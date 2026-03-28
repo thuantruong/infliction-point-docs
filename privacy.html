@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Infliction Point</title>
+  <meta name="description" content="Privacy policy for Infliction Point, a padel scoreboard app for Android.">
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .privacy-content { max-width: 720px; margin: 0 auto; }
+    .privacy-content h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--heading-color);
+      margin-bottom: 8px;
+    }
+    .privacy-content .last-updated {
+      font-size: 0.85rem;
+      margin-bottom: 48px;
+    }
+    .privacy-content h2 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--heading-color);
+      margin: 32px 0 12px;
+    }
+    .privacy-content p { margin-bottom: 16px; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <img src="images/logo.png" alt="Infliction Point logo" width="36" height="36">
+        Infliction Point
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#formats">Formats</a></li>
+        <li><a href="index.html#download">Download</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+      </ul>
+      <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Privacy Policy -->
+  <section style="padding-top: 100px;">
+    <div class="container privacy-content">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Last updated: March 28, 2026</p>
+
+      <h2>Data Collection</h2>
+      <p>Infliction Point does not collect, store, or transmit any personal data. All match data exists only in device memory for the duration of the match and is not persisted or sent to any server.</p>
+
+      <h2>Wearable Data Layer</h2>
+      <p>If you use the Wear OS companion app, match state is synced between your phone and watch via Google's Wearable Data Layer API. This data stays entirely on your devices and is not sent to any external server.</p>
+
+      <h2>Third-Party Services</h2>
+      <p>The app uses Android's built-in Text-to-Speech engine for score announcements. No data is sent to 2an.dev or any third-party servers.</p>
+
+      <h2>Bluetooth Devices</h2>
+      <p>If you pair a Flic button, its MAC address is stored locally on your device in SharedPreferences for reconnection purposes. If you configure a Bluetooth shutter remote, key mappings are stored locally. No Bluetooth device data is transmitted externally.</p>
+
+      <h2>Changes to This Policy</h2>
+      <p>We may update this privacy policy from time to time. Any changes will be reflected on this page with an updated revision date.</p>
+
+      <h2>Contact</h2>
+      <p>If you have questions about this privacy policy, contact us at <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a>.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <span>&copy; 2an.dev. All rights reserved.</span>
+      <ul class="footer-links">
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="mailto:infliction-point@2an.dev">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
