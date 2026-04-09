@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0E0E0E;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  color: #FFFFFF;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- Scoreboard --- */
+
+#scoreboard {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.team1-bg { background: #1565C0; }
+.team2-bg { background: #EF6C00; }
+
+.team-label {
+  position: absolute;
+  top: 5%;
+  font-size: 2.5vw;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.points {
+  font-size: 22vw;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.serve-indicator {
+  position: absolute;
+  width: 3vw;
+  height: 3vw;
+  border-radius: 50%;
+  background: #D5FB28;
+  opacity: 0.7;
+  bottom: 8%;
+}
+
+#team1 .serve-indicator { left: 8%; }
+#team2 .serve-indicator { right: 8%; }
+
+.winner-crown {
+  position: absolute;
+  top: 15%;
+  font-size: 12vw;
+  opacity: 0.3;
+}
+
+/* --- Center Overlay --- */
+
+#center-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+  background: rgba(14, 14, 14, 0.85);
+  padding: 2vh 3vw;
+  border-radius: 2vh;
+  min-width: 20vw;
+}
+
+.format-label {
+  font-size: 1.8vw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5vw;
+  font-size: 4vw;
+  font-weight: 700;
+}
+
+.score-team1 { color: #64B5F6; }
+.score-team2 { color: #FFB74D; }
+.score-separator { color: rgba(255,255,255,0.4); }
+
+.dots-row {
+  display: flex;
+  gap: 0.8vw;
+  align-items: center;
+}
+
+.dot {
+  width: 1.2vw;
+  height: 1.2vw;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: transparent;
+}
+
+.dot.team1-won { background: #1565C0; border-color: #1565C0; }
+.dot.team2-won { background: #EF6C00; border-color: #EF6C00; }
+.dot.current { background: #D5FB28; border-color: #D5FB28; }
+
+/* --- Idle --- */
+
+#idle {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: #0E0E0E;
+}
+
+.idle-content {
+  text-align: center;
+}
+
+.idle-logo {
+  font-size: 8vw;
+  font-weight: 700;
+  color: #D5FB28;
+  letter-spacing: 0.05em;
+}
+
+.idle-subtitle {
+  font-size: 2.5vw;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 1vh;
+  font-weight: 400;
+}

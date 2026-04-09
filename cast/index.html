@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infliction Point Cast Receiver</title>
+  <link rel="stylesheet" href="receiver.css">
+  <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+</head>
+<body>
+  <div id="scoreboard" class="hidden">
+    <div id="team1" class="team-panel team1-bg">
+      <div class="team-label">TEAM 1</div>
+      <div id="points1" class="points">0</div>
+      <div id="serve1" class="serve-indicator hidden"></div>
+      <div id="winner1" class="winner-crown hidden"></div>
+    </div>
+    <div id="center-overlay">
+      <div id="format-label" class="format-label"></div>
+      <div id="score-row" class="score-row"></div>
+      <div id="dots-row" class="dots-row"></div>
+    </div>
+    <div id="team2" class="team-panel team2-bg">
+      <div class="team-label">TEAM 2</div>
+      <div id="points2" class="points">0</div>
+      <div id="serve2" class="serve-indicator hidden"></div>
+      <div id="winner2" class="winner-crown hidden"></div>
+    </div>
+  </div>
+
+  <div id="idle">
+    <div class="idle-content">
+      <div class="idle-logo">Infliction Point</div>
+      <div class="idle-subtitle">Padel Scoreboard</div>
+    </div>
+  </div>
+
+  <script src="receiver.js"></script>
+</body>
+</html>
