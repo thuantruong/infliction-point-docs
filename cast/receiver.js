@@ -30,7 +30,12 @@ function showScoreboard() {
 
 // --- Rendering ---
 
+var debugCount = 0;
+
 function renderMatchState(state) {
+  debugCount++;
+  // Temporary: show message count + raw points on screen for debugging
+  formatLabelEl.textContent = 'MSG #' + debugCount + ' | pts=' + state.pointsTeam1 + '/' + state.pointsTeam2;
   showScoreboard();
 
   const config = state.config;
@@ -206,17 +211,26 @@ function pointDisplayValue(point) {
 const castContext = cast.framework.CastReceiverContext.getInstance();
 
 castContext.addCustomMessageListener(NAMESPACE, function(event) {
-  const data = event.data;
-  let message;
-  if (typeof data === 'string') {
-    try { message = JSON.parse(data); } catch (e) { return; }
-  } else {
-    message = data;
+  console.log('Cast message received, type of data:', typeof event.data);
+
+  var message = event.data;
+
+  // The Cast SDK may deliver data as a string or already-parsed object
+  if (typeof message === 'string') {
+    try { message = JSON.parse(message); } catch (e) {
+      console.error('Failed to parse message:', e);
+      return;
+    }
   }
+
+  console.log('Message type:', message.type);
 
   switch (message.type) {
     case 'match_state':
-      renderMatchState(message.state);
+      if (message.state) {
+        console.log('Rendering state, format:', message.state.config && message.state.config.matchFormat);
+        renderMatchState(message.state);
+      }
       break;
     case 'idle':
       showIdle();
