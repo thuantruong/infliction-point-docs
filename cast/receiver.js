@@ -4,6 +4,9 @@ const NAMESPACE = 'urn:x-cast:dev.2an.inflictionpoint.score';
 
 const scoreboardEl = document.getElementById('scoreboard');
 const idleEl = document.getElementById('idle');
+const idleDefaultEl = document.getElementById('idle-default');
+const slideshowEl = document.getElementById('slideshow');
+const slideContainerEl = document.getElementById('slide-container');
 
 // Point display elements
 const points1El = document.getElementById('points1');
@@ -18,12 +21,33 @@ const formatLabelEl = document.getElementById('format-label');
 const scoreRowEl = document.getElementById('score-row');
 const dotsRowEl = document.getElementById('dots-row');
 
-function showIdle() {
+function showIdle(playlistUrl) {
+  stopSlideshow();
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
+
+  if (playlistUrl) {
+    // Ensure trailing slash
+    var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
+    fetch(baseUrl + 'playlist.json')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.slides && data.slides.length > 0) {
+          startSlideshow(data, baseUrl);
+        } else {
+          showIdleDefault();
+        }
+      })
+      .catch(function() {
+        showIdleDefault();
+      });
+  } else {
+    showIdleDefault();
+  }
 }
 
 function showScoreboard() {
+  stopSlideshow();
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
@@ -201,6 +225,90 @@ function pointDisplayValue(point) {
   }
 }
 
+// --- Slideshow ---
+
+var slideshowTimer = null;
+var slideshowData = null;
+var slideshowBaseUrl = null;
+var currentSlideIndex = -1;
+
+function stopSlideshow() {
+  if (slideshowTimer) {
+    clearTimeout(slideshowTimer);
+    slideshowTimer = null;
+  }
+  slideshowData = null;
+  slideshowBaseUrl = null;
+  currentSlideIndex = -1;
+  slideContainerEl.innerHTML = '';
+  slideshowEl.classList.add('hidden');
+  slideshowEl.style.backgroundColor = '';
+}
+
+function showIdleDefault() {
+  stopSlideshow();
+  idleDefaultEl.classList.remove('hidden');
+}
+
+function startSlideshow(data, baseUrl) {
+  idleDefaultEl.classList.add('hidden');
+  slideshowEl.classList.remove('hidden');
+
+  if (data.backgroundColor) {
+    slideshowEl.style.backgroundColor = data.backgroundColor;
+  }
+
+  slideshowData = data;
+  slideshowBaseUrl = baseUrl;
+  currentSlideIndex = -1;
+  showNextSlide();
+}
+
+function showNextSlide() {
+  if (!slideshowData || !slideshowData.slides || slideshowData.slides.length === 0) return;
+
+  currentSlideIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
+  var slide = slideshowData.slides[currentSlideIndex];
+  var src = slideshowBaseUrl + slide.src;
+  var isVideo = /\.(mp4|webm|ogg)$/i.test(slide.src);
+
+  // Fade out current content
+  var current = slideContainerEl.firstChild;
+  if (current) {
+    current.classList.remove('slide-fade-in');
+    current.classList.add('slide-fade-out');
+    setTimeout(function() {
+      if (current.parentNode) current.parentNode.removeChild(current);
+    }, 800);
+  }
+
+  if (isVideo) {
+    var video = document.createElement('video');
+    video.src = src;
+    video.autoplay = true;
+    video.muted = false;
+    video.playsInline = true;
+    video.className = 'slide-fade-in';
+    video.addEventListener('ended', function() {
+      showNextSlide();
+    });
+    video.addEventListener('error', function() {
+      slideshowTimer = setTimeout(showNextSlide, 2000);
+    });
+    slideContainerEl.appendChild(video);
+  } else {
+    var img = document.createElement('img');
+    img.src = src;
+    img.className = 'slide-fade-in';
+    img.addEventListener('error', function() {
+      slideshowTimer = setTimeout(showNextSlide, 2000);
+    });
+    slideContainerEl.appendChild(img);
+    var duration = (slide.duration || 10) * 1000;
+    slideshowTimer = setTimeout(showNextSlide, duration);
+  }
+}
+
 // --- Cast Receiver Setup ---
 
 const castContext = cast.framework.CastReceiverContext.getInstance();
@@ -216,7 +324,7 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
       if (message.state) renderMatchState(message.state);
       break;
     case 'idle':
-      showIdle();
+      showIdle(message.playlistUrl);
       break;
   }
 });
@@ -224,7 +332,7 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
 // Show idle on sender disconnect
 castContext.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, function(event) {
   if (castContext.getSenders().length === 0) {
-    showIdle();
+    showIdle(null);
   }
 });
 
@@ -234,4 +342,4 @@ options.disableIdleTimeout = true;
 castContext.start(options);
 
 // Start in idle mode
-showIdle();
+showIdle(null);
