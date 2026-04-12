@@ -22,32 +22,44 @@ const scoreRowEl = document.getElementById('score-row');
 const dotsRowEl = document.getElementById('dots-row');
 
 function showIdle(playlistUrl) {
-  stopSlideshow();
+  pauseSlideshow();
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
-  if (playlistUrl) {
-    // Ensure trailing slash
-    var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
-    fetch(baseUrl + 'playlist.json')
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.slides && data.slides.length > 0) {
-          startSlideshow(data, baseUrl);
-        } else {
-          showIdleDefault();
-        }
-      })
-      .catch(function() {
-        showIdleDefault();
-      });
-  } else {
+  if (!playlistUrl) {
+    clearSlideshow();
     showIdleDefault();
+    return;
   }
+
+  var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
+
+  // Same URL: resume existing slideshow without re-fetching
+  if (baseUrl === currentPlaylistUrl && slideshowData) {
+    resumeSlideshow();
+    return;
+  }
+
+  // Different URL: clear old state and fetch new playlist
+  clearSlideshow();
+  currentPlaylistUrl = baseUrl;
+
+  fetch(baseUrl + 'playlist.json')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data && data.slides && data.slides.length > 0) {
+        startSlideshow(data, baseUrl);
+      } else {
+        showIdleDefault();
+      }
+    })
+    .catch(function() {
+      showIdleDefault();
+    });
 }
 
 function showScoreboard() {
-  stopSlideshow();
+  pauseSlideshow();
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
@@ -230,29 +242,84 @@ function pointDisplayValue(point) {
 var slideshowTimer = null;
 var slideshowData = null;
 var slideshowBaseUrl = null;
+var currentPlaylistUrl = null;
 var currentSlideIndex = -1;
+var slideshowPaused = false;
+var nextPreloaded = null;       // pre-loaded element for next slide
+var nextPreloadedIndex = -1;    // which slide index is pre-loaded
+var currentDisplayed = null;    // element currently showing
 
-function stopSlideshow() {
+function isVideoSrc(src) {
+  return /\.(mp4|webm|ogg)$/i.test(src);
+}
+
+function releaseElement(el) {
+  if (!el) return;
+  if (el.tagName === 'VIDEO') {
+    el.pause();
+    el.removeAttribute('src');
+    el.load(); // free media buffer
+  }
+  if (el.parentNode) el.parentNode.removeChild(el);
+}
+
+function pauseSlideshow() {
+  // Pause without clearing state — allows resume
   if (slideshowTimer) {
     clearTimeout(slideshowTimer);
     slideshowTimer = null;
   }
+  slideshowPaused = true;
+  // Pause any playing video
+  if (currentDisplayed && currentDisplayed.tagName === 'VIDEO') {
+    currentDisplayed.pause();
+  }
+}
+
+function clearSlideshow() {
+  // Full cleanup — releases all resources
+  if (slideshowTimer) {
+    clearTimeout(slideshowTimer);
+    slideshowTimer = null;
+  }
+  releaseElement(currentDisplayed);
+  currentDisplayed = null;
+  releaseElement(nextPreloaded);
+  nextPreloaded = null;
+  nextPreloadedIndex = -1;
   slideshowData = null;
   slideshowBaseUrl = null;
+  currentPlaylistUrl = null;
   currentSlideIndex = -1;
+  slideshowPaused = false;
   slideContainerEl.innerHTML = '';
   slideshowEl.classList.add('hidden');
   slideshowEl.style.backgroundColor = '';
 }
 
 function showIdleDefault() {
-  stopSlideshow();
+  clearSlideshow();
   idleDefaultEl.classList.remove('hidden');
+}
+
+function resumeSlideshow() {
+  if (!slideshowData || !slideshowData.slides || slideshowData.slides.length === 0) return;
+  idleDefaultEl.classList.add('hidden');
+  slideshowEl.classList.remove('hidden');
+  slideshowPaused = false;
+  // Resume current video or advance to next slide
+  if (currentDisplayed && currentDisplayed.tagName === 'VIDEO' && currentDisplayed.parentNode) {
+    var playPromise = currentDisplayed.play();
+    if (playPromise) playPromise.catch(function() {});
+  } else {
+    showNextSlide();
+  }
 }
 
 function startSlideshow(data, baseUrl) {
   idleDefaultEl.classList.add('hidden');
   slideshowEl.classList.remove('hidden');
+  slideshowPaused = false;
 
   if (data.backgroundColor) {
     slideshowEl.style.backgroundColor = data.backgroundColor;
@@ -261,49 +328,127 @@ function startSlideshow(data, baseUrl) {
   slideshowData = data;
   slideshowBaseUrl = baseUrl;
   currentSlideIndex = -1;
-  showNextSlide();
+
+  // Pre-load first slide, then show it
+  preloadSlide(0, function(el) {
+    nextPreloaded = el;
+    nextPreloadedIndex = 0;
+    showNextSlide();
+  });
+}
+
+function preloadSlide(index, callback) {
+  if (!slideshowData || !slideshowData.slides) return;
+  var slide = slideshowData.slides[index];
+  var src = slideshowBaseUrl + slide.src;
+
+  if (isVideoSrc(slide.src)) {
+    var video = document.createElement('video');
+    video.preload = 'auto';
+    video.playsInline = true;
+    video.muted = false;
+    video.src = src;
+    video.addEventListener('canplaythrough', function onReady() {
+      video.removeEventListener('canplaythrough', onReady);
+      if (callback) callback(video);
+    });
+    video.addEventListener('error', function() {
+      if (callback) callback(video); // show anyway, will handle error on play
+    });
+    video.load();
+  } else {
+    var img = document.createElement('img');
+    img.src = src;
+    img.addEventListener('load', function() {
+      if (callback) callback(img);
+    });
+    img.addEventListener('error', function() {
+      if (callback) callback(img);
+    });
+  }
 }
 
 function showNextSlide() {
   if (!slideshowData || !slideshowData.slides || slideshowData.slides.length === 0) return;
+  if (slideshowPaused) return;
 
-  currentSlideIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
-  var slide = slideshowData.slides[currentSlideIndex];
-  var src = slideshowBaseUrl + slide.src;
-  var isVideo = /\.(mp4|webm|ogg)$/i.test(slide.src);
+  var targetIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
+  var slide = slideshowData.slides[targetIndex];
+  currentSlideIndex = targetIndex;
 
-  // Fade out current content
-  var current = slideContainerEl.firstChild;
-  if (current) {
-    current.classList.remove('slide-fade-in');
-    current.classList.add('slide-fade-out');
-    setTimeout(function() {
-      if (current.parentNode) current.parentNode.removeChild(current);
-    }, 800);
+  // Fade out and release old element
+  var old = currentDisplayed;
+  if (old) {
+    old.classList.remove('slide-fade-in');
+    old.classList.add('slide-fade-out');
+    setTimeout(function() { releaseElement(old); }, 800);
+    currentDisplayed = null;
   }
 
-  if (isVideo) {
+  // Use pre-loaded element if available for this index
+  var el;
+  if (nextPreloaded && nextPreloadedIndex === targetIndex) {
+    el = nextPreloaded;
+    nextPreloaded = null;
+    nextPreloadedIndex = -1;
+  } else {
+    // Fallback: create on-the-fly (first slide or cache miss)
+    el = createElement(targetIndex);
+  }
+
+  displayElement(el, slide);
+
+  // Pre-load next slide (look-ahead of 1)
+  var nextIndex = (targetIndex + 1) % slideshowData.slides.length;
+  preloadSlide(nextIndex, function(preloaded) {
+    // Only store if slideshow is still active and index is still relevant
+    if (!slideshowPaused && slideshowData) {
+      nextPreloaded = preloaded;
+      nextPreloadedIndex = nextIndex;
+    } else {
+      releaseElement(preloaded);
+    }
+  });
+}
+
+function createElement(index) {
+  var slide = slideshowData.slides[index];
+  var src = slideshowBaseUrl + slide.src;
+  if (isVideoSrc(slide.src)) {
     var video = document.createElement('video');
     video.src = src;
-    video.autoplay = true;
-    video.muted = false;
     video.playsInline = true;
-    video.className = 'slide-fade-in';
-    video.addEventListener('ended', function() {
-      showNextSlide();
-    });
-    video.addEventListener('error', function() {
-      slideshowTimer = setTimeout(showNextSlide, 2000);
-    });
-    slideContainerEl.appendChild(video);
+    video.muted = false;
+    return video;
   } else {
     var img = document.createElement('img');
     img.src = src;
-    img.className = 'slide-fade-in';
-    img.addEventListener('error', function() {
+    return img;
+  }
+}
+
+function displayElement(el, slide) {
+  currentDisplayed = el;
+  el.className = 'slide-fade-in';
+  slideContainerEl.appendChild(el);
+
+  if (el.tagName === 'VIDEO') {
+    el.addEventListener('ended', function onEnded() {
+      el.removeEventListener('ended', onEnded);
+      showNextSlide();
+    });
+    el.addEventListener('error', function onError() {
+      el.removeEventListener('error', onError);
       slideshowTimer = setTimeout(showNextSlide, 2000);
     });
-    slideContainerEl.appendChild(img);
+    var playPromise = el.play();
+    if (playPromise) {
+      playPromise.catch(function() {
+        // Autoplay blocked or error — skip to next
+        slideshowTimer = setTimeout(showNextSlide, 2000);
+      });
+    }
+  } else {
     var duration = (slide.duration || 10) * 1000;
     slideshowTimer = setTimeout(showNextSlide, duration);
   }
