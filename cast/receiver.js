@@ -426,14 +426,8 @@ function showNextSlide() {
   var slide = slideshowData.slides[targetIndex];
   currentSlideIndex = targetIndex;
 
-  // Fade out and release old element
+  // Keep old element visible until new one is ready
   var old = currentDisplayed;
-  if (old) {
-    old.classList.remove('slide-fade-in');
-    old.classList.add('slide-fade-out');
-    setTimeout(function() { releaseElement(old); }, 800);
-    currentDisplayed = null;
-  }
 
   // Use pre-loaded element if available for this index
   var el;
@@ -442,16 +436,14 @@ function showNextSlide() {
     nextPreloaded = null;
     nextPreloadedIndex = -1;
   } else {
-    // Fallback: create on-the-fly (first slide or cache miss)
     el = createElement(targetIndex);
   }
 
-  displayElement(el, slide);
+  displayElement(el, slide, old);
 
   // Pre-load next slide (look-ahead of 1)
   var nextIndex = (targetIndex + 1) % slideshowData.slides.length;
   preloadSlide(nextIndex, function(preloaded) {
-    // Only store if slideshow is still active and index is still relevant
     if (!slideshowPaused && slideshowData) {
       nextPreloaded = preloaded;
       nextPreloadedIndex = nextIndex;
@@ -477,28 +469,64 @@ function createElement(index) {
   }
 }
 
-function displayElement(el, slide) {
+function fadeOutAndRelease(old) {
+  if (!old) return;
+  old.classList.remove('slide-fade-in');
+  old.classList.add('slide-fade-out');
+  setTimeout(function() { releaseElement(old); }, 800);
+}
+
+function displayElement(el, slide, old) {
   currentDisplayed = el;
-  el.className = 'slide-fade-in';
-  slideContainerEl.appendChild(el);
 
   if (el.tagName === 'VIDEO') {
+    // Start invisible — don't show until first frame is decoded
+    el.style.opacity = '0';
+    slideContainerEl.appendChild(el);
+
+    var revealed = false;
+    function revealVideo() {
+      if (revealed) return;
+      revealed = true;
+      el.style.opacity = '';
+      el.className = 'slide-fade-in';
+      fadeOutAndRelease(old);
+    }
+
+    // If already has data (pre-loaded), reveal immediately
+    if (el.readyState >= 2) {
+      revealVideo();
+    } else {
+      el.addEventListener('loadeddata', function onData() {
+        el.removeEventListener('loadeddata', onData);
+        revealVideo();
+      });
+      // Fallback: reveal after 1s even if loadeddata never fires
+      setTimeout(revealVideo, 1000);
+    }
+
     el.addEventListener('ended', function onEnded() {
       el.removeEventListener('ended', onEnded);
       showNextSlide();
     });
     el.addEventListener('error', function onError() {
       el.removeEventListener('error', onError);
+      fadeOutAndRelease(old);
       slideshowTimer = setTimeout(showNextSlide, 2000);
     });
+
     var playPromise = el.play();
     if (playPromise) {
       playPromise.catch(function() {
-        // Autoplay blocked or error — skip to next
+        fadeOutAndRelease(old);
         slideshowTimer = setTimeout(showNextSlide, 2000);
       });
     }
   } else {
+    // Images: fade in immediately (already decoded from pre-load or cache)
+    el.className = 'slide-fade-in';
+    slideContainerEl.appendChild(el);
+    fadeOutAndRelease(old);
     var duration = (slide.duration || 10) * 1000;
     slideshowTimer = setTimeout(showNextSlide, duration);
   }
