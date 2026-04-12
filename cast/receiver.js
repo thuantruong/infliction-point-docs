@@ -102,16 +102,18 @@ function renderTeamPanels(state, format) {
     text1 = '\u2014';
     text2 = '\u2014';
   } else if (isOver && winner) {
-    // Winner gets medal, loser gets nothing
+    // Winner gets trophy + team label, loser gets nothing
     if (winner === 'TEAM_1') {
       scoreContainer1El.classList.add('hidden');
       medal1El.classList.remove('hidden');
+      label1El.classList.remove('hidden');
       scoreContainer2El.classList.add('hidden');
       medal2El.classList.add('hidden');
       label2El.classList.add('hidden');
     } else {
       scoreContainer2El.classList.add('hidden');
       medal2El.classList.remove('hidden');
+      label2El.classList.remove('hidden');
       scoreContainer1El.classList.add('hidden');
       medal1El.classList.add('hidden');
       label1El.classList.add('hidden');
