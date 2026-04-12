@@ -197,16 +197,8 @@ html, body {
   to { opacity: 0; }
 }
 
-.idle-logo {
-  font-size: 8vw;
-  font-weight: 700;
-  color: #D5FB28;
-  letter-spacing: 0.05em;
-}
-
-.idle-subtitle {
-  font-size: 2.5vw;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 1vh;
-  font-weight: 400;
+.idle-logo-img {
+  max-width: 40vw;
+  max-height: 40vh;
+  object-fit: contain;
 }
