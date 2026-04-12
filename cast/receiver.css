@@ -9,7 +9,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #0E0E0E;
-  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Manrope', 'Segoe UI', 'Roboto', sans-serif;
   color: #FFFFFF;
 }
 
@@ -29,51 +29,75 @@ html, body {
 .team-panel {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
 }
 
-.team1-bg { background: #1565C0; }
-.team2-bg { background: #EF6C00; }
+.team1-bg { background: #1A3A5C; }
+.team2-bg { background: #5C2A0E; }
 
-.team-label {
-  position: absolute;
-  top: 5%;
-  font-size: 2.5vw;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  opacity: 0.7;
-  text-transform: uppercase;
+/* --- Score Container (points + label pill) --- */
+
+.score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
 }
 
 .points {
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 22vw;
   font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  line-height: 1.1;
+  color: #D5FB28;
+  -webkit-text-stroke: 3px rgba(0, 0, 0, 0.6);
+  paint-order: stroke fill;
+  letter-spacing: -0.02em;
 }
 
-.serve-indicator {
+.team-label-pill {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.4vw;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  padding: 0.5vw 1.5vw;
+  border-radius: 9999px;
+  margin-top: 1vh;
+}
+
+.team1-pill { background: rgba(21, 101, 192, 0.25); }
+.team2-pill { background: rgba(230, 81, 0, 0.25); }
+
+/* --- Serve Indicator (large semi-transparent circle) --- */
+
+.serve-ball {
   position: absolute;
-  width: 3vw;
-  height: 3vw;
+  width: 12vw;
+  height: 12vw;
   border-radius: 50%;
   background: #D5FB28;
-  opacity: 0.7;
-  bottom: 8%;
+  opacity: 0.15;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
-#team1 .serve-indicator { left: 8%; }
-#team2 .serve-indicator { right: 8%; }
+#team1 .serve-ball { left: -3vw; }
+#team2 .serve-ball { right: -3vw; }
 
-.winner-crown {
-  position: absolute;
-  top: 15%;
-  font-size: 12vw;
-  opacity: 0.3;
+/* --- Winner Medal --- */
+
+.medal {
+  font-size: 20vw;
+  color: #D5FB28;
+  z-index: 2;
+  line-height: 1;
+  filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
 }
 
 /* --- Center Overlay --- */
@@ -87,50 +111,75 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1vh;
-  background: rgba(14, 14, 14, 0.85);
-  padding: 2vh 3vw;
-  border-radius: 2vh;
-  min-width: 20vw;
+  gap: 0.6vh;
+  background: rgba(32, 32, 31, 0.85);
+  padding: 1.8vh 2.5vw;
+  border-radius: 1vw;
+  min-width: 15vw;
 }
 
 .format-label {
-  font-size: 1.8vw;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.1vw;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
 }
 
 .score-row {
   display: flex;
   align-items: center;
-  gap: 1.5vw;
-  font-size: 4vw;
+  gap: 1vw;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
+}
+
+.score-row.large { font-size: 3.5vw; }
+.score-row.medium { font-size: 2.8vw; }
+
+.score-row-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1vw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  margin-top: 0.3vh;
 }
 
 .score-team1 { color: #64B5F6; }
 .score-team2 { color: #FFB74D; }
-.score-separator { color: rgba(255,255,255,0.4); }
+.score-separator { color: rgba(255, 255, 255, 0.4); }
 
 .dots-row {
   display: flex;
-  gap: 0.8vw;
+  gap: 0.5vw;
   align-items: center;
+  margin-bottom: 0.3vh;
 }
 
 .dot {
-  width: 1.2vw;
-  height: 1.2vw;
+  width: 0.7vw;
+  height: 0.7vw;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 1.5px solid #D5FB28;
   background: transparent;
 }
 
 .dot.team1-won { background: #1565C0; border-color: #1565C0; }
-.dot.team2-won { background: #EF6C00; border-color: #EF6C00; }
-.dot.current { background: #D5FB28; border-color: #D5FB28; }
+.dot.team2-won { background: #E65100; border-color: #E65100; }
+.dot.current  { background: #D5FB28; border-color: #D5FB28; }
+
+.badge {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1vw;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #EF5350;
+  text-transform: uppercase;
+  margin-top: 0.2vh;
+}
 
 /* --- Idle --- */
 
@@ -152,6 +201,12 @@ html, body {
 
 .idle-content {
   text-align: center;
+}
+
+.idle-logo-img {
+  max-width: 40vw;
+  max-height: 40vh;
+  object-fit: contain;
 }
 
 /* --- Slideshow --- */
@@ -195,10 +250,4 @@ html, body {
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
-}
-
-.idle-logo-img {
-  max-width: 40vw;
-  max-height: 40vh;
-  object-fit: contain;
 }

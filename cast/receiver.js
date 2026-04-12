@@ -8,18 +8,25 @@ const idleDefaultEl = document.getElementById('idle-default');
 const slideshowEl = document.getElementById('slideshow');
 const slideContainerEl = document.getElementById('slide-container');
 
-// Point display elements
+// Team panel elements
 const points1El = document.getElementById('points1');
 const points2El = document.getElementById('points2');
+const scoreContainer1El = document.getElementById('score-container1');
+const scoreContainer2El = document.getElementById('score-container2');
+const label1El = document.getElementById('label1');
+const label2El = document.getElementById('label2');
 const serve1El = document.getElementById('serve1');
 const serve2El = document.getElementById('serve2');
-const winner1El = document.getElementById('winner1');
-const winner2El = document.getElementById('winner2');
+const medal1El = document.getElementById('medal1');
+const medal2El = document.getElementById('medal2');
 
 // Center overlay elements
 const formatLabelEl = document.getElementById('format-label');
-const scoreRowEl = document.getElementById('score-row');
+const scoreRow1El = document.getElementById('score-row-1');
+const scoreRowLabelEl = document.getElementById('score-row-label');
+const scoreRow2El = document.getElementById('score-row-2');
 const dotsRowEl = document.getElementById('dots-row');
+const badgeEl = document.getElementById('badge');
 
 function showIdle(playlistUrl) {
   pauseSlideshow();
@@ -69,162 +76,205 @@ function showScoreboard() {
 function renderMatchState(state) {
   showScoreboard();
 
-  const config = state.config;
-  const format = config.matchFormat;
+  var config = state.config;
+  var format = config.matchFormat;
 
-  // Points display
-  if (format === 'FIXED_POINT') {
-    points1El.textContent = state.sets[state.currentSetIndex].gamesTeam1;
-    points2El.textContent = state.sets[state.currentSetIndex].gamesTeam2;
-  } else if (state.isTiebreak) {
-    points1El.textContent = state.tiebreakPointsTeam1;
-    points2El.textContent = state.tiebreakPointsTeam2;
-  } else if (state.isDeuce) {
-    if (state.advantageTeam === 'TEAM_1') {
-      points1El.textContent = 'AD';
-      points2El.textContent = '\u2014';
-    } else if (state.advantageTeam === 'TEAM_2') {
-      points1El.textContent = '\u2014';
-      points2El.textContent = 'AD';
-    } else {
-      points1El.textContent = '40';
-      points2El.textContent = '40';
-    }
-  } else {
-    points1El.textContent = pointDisplayValue(state.pointsTeam1);
-    points2El.textContent = pointDisplayValue(state.pointsTeam2);
-  }
+  // --- Team panels: big score text ---
+  renderTeamPanels(state, format);
 
-  // Match over: show draw dashes
-  if (state.isMatchOver && !state.matchWinner) {
-    points1El.textContent = '\u2014';
-    points2El.textContent = '\u2014';
-  }
-
-  // Serve indicator
-  serve1El.classList.toggle('hidden', state.servingTeam !== 'TEAM_1' || state.isMatchOver);
-  serve2El.classList.toggle('hidden', state.servingTeam !== 'TEAM_2' || state.isMatchOver);
-
-  // Winner crown
-  winner1El.classList.toggle('hidden', state.matchWinner !== 'TEAM_1');
-  winner2El.classList.toggle('hidden', state.matchWinner !== 'TEAM_2');
-  winner1El.textContent = '\uD83D\uDC51';
-  winner2El.textContent = '\uD83D\uDC51';
-
-  // Center overlay
+  // --- Center overlay ---
   renderCenterOverlay(state, config, format);
 }
 
-function renderCenterOverlay(state, config, format) {
-  // Format label
-  switch (format) {
-    case 'CLASSIC':
-      if (config.bestOfSets === 1) {
-        formatLabelEl.textContent = 'CLASSIC';
-      } else {
-        formatLabelEl.textContent = 'CLASSIC (' + config.bestOfSets + ' SETS)';
-      }
-      break;
-    case 'TOTAL_GAMES':
-      formatLabelEl.textContent = 'TOTAL GAMES';
-      break;
-    case 'FIXED_POINT':
-      formatLabelEl.textContent = config.totalPoints + ' POINTS';
-      break;
-    default:
-      formatLabelEl.textContent = '';
-  }
+function renderTeamPanels(state, format) {
+  var isOver = state.isMatchOver;
+  var winner = state.matchWinner;
+  var isDraw = isOver && !winner;
 
-  // Score row
-  scoreRowEl.innerHTML = '';
-  if (format === 'CLASSIC') {
-    if (config.bestOfSets === 1) {
-      // Single set: show game score
-      renderScoreValues(state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+  // Serve indicators
+  serve1El.classList.toggle('hidden', state.servingTeam !== 'TEAM_1' || isOver);
+  serve2El.classList.toggle('hidden', state.servingTeam !== 'TEAM_2' || isOver);
+
+  // Determine big score text for each team
+  var text1, text2;
+
+  if (isDraw) {
+    text1 = '\u2014';
+    text2 = '\u2014';
+  } else if (isOver && winner) {
+    // Winner gets medal, loser gets nothing
+    if (winner === 'TEAM_1') {
+      scoreContainer1El.classList.add('hidden');
+      medal1El.classList.remove('hidden');
+      scoreContainer2El.classList.add('hidden');
+      medal2El.classList.add('hidden');
+      label2El.classList.add('hidden');
     } else {
-      // Multi-set: show sets won
-      const setsWon1 = state.sets.filter(s => s.winner === 'TEAM_1').length;
-      const setsWon2 = state.sets.filter(s => s.winner === 'TEAM_2').length;
-      renderScoreValues(setsWon1, setsWon2);
+      scoreContainer2El.classList.add('hidden');
+      medal2El.classList.remove('hidden');
+      scoreContainer1El.classList.add('hidden');
+      medal1El.classList.add('hidden');
+      label1El.classList.add('hidden');
     }
-  } else if (format === 'TOTAL_GAMES') {
-    const gamesWon1 = state.sets.reduce((sum, s) => sum + s.gamesTeam1, 0);
-    const gamesWon2 = state.sets.reduce((sum, s) => sum + s.gamesTeam2, 0);
-    renderScoreValues(gamesWon1, gamesWon2);
+    return;
   } else if (format === 'FIXED_POINT') {
-    // Fixed point: center shows total played / total points
-    const played = state.sets[0].gamesTeam1 + state.sets[0].gamesTeam2;
-    formatLabelEl.textContent = played + ' / ' + config.totalPoints + ' POINTS';
-    scoreRowEl.innerHTML = '';
+    text1 = state.sets[state.currentSetIndex].gamesTeam1;
+    text2 = state.sets[state.currentSetIndex].gamesTeam2;
+  } else if (state.isTiebreak) {
+    text1 = state.tiebreakPointsTeam1;
+    text2 = state.tiebreakPointsTeam2;
+  } else if (state.isDeuce) {
+    if (state.advantageTeam === 'TEAM_1') {
+      text1 = 'AD';
+      text2 = '\u2014';
+    } else if (state.advantageTeam === 'TEAM_2') {
+      text1 = '\u2014';
+      text2 = 'AD';
+    } else {
+      text1 = '40';
+      text2 = '40';
+    }
+  } else {
+    text1 = pointDisplayValue(state.pointsTeam1);
+    text2 = pointDisplayValue(state.pointsTeam2);
   }
 
-  // Dots
-  renderDots(state, config, format);
+  // Show score containers, hide medals
+  scoreContainer1El.classList.remove('hidden');
+  scoreContainer2El.classList.remove('hidden');
+  medal1El.classList.add('hidden');
+  medal2El.classList.add('hidden');
+  label1El.classList.remove('hidden');
+  label2El.classList.remove('hidden');
+
+  points1El.textContent = text1;
+  points2El.textContent = text2;
 }
 
-function renderScoreValues(score1, score2) {
-  const s1 = document.createElement('span');
+function renderCenterOverlay(state, config, format) {
+  // Clear all
+  dotsRowEl.innerHTML = '';
+  scoreRow1El.innerHTML = '';
+  scoreRow1El.className = 'score-row';
+  scoreRow2El.innerHTML = '';
+  scoreRow2El.className = 'score-row';
+  scoreRowLabelEl.classList.add('hidden');
+  badgeEl.classList.add('hidden');
+
+  var isOver = state.isMatchOver;
+  var winner = state.matchWinner;
+  var isDraw = isOver && !winner;
+
+  if (format === 'CLASSIC') {
+    if (config.bestOfSets === 1) {
+      // Single-set: game dots + game score
+      renderGameDots(state, config.gamesPerSet * 2 - 1);
+      formatLabelEl.textContent = 'Games to ' + config.gamesPerSet;
+      renderScoreRow(scoreRow1El, 'large',
+        state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+    } else {
+      // Multi-set: set dots + sets score + games score
+      renderSetDots(state, config.bestOfSets);
+      formatLabelEl.textContent = 'Best of ' + config.bestOfSets + ' Sets';
+      var setsWon1 = state.sets.filter(function(s) { return s.winner === 'TEAM_1'; }).length;
+      var setsWon2 = state.sets.filter(function(s) { return s.winner === 'TEAM_2'; }).length;
+      renderScoreRow(scoreRow1El, 'medium', setsWon1, setsWon2);
+
+      if (!isOver) {
+        scoreRowLabelEl.textContent = 'Games to ' + config.gamesPerSet;
+        scoreRowLabelEl.classList.remove('hidden');
+        var currentSet = state.sets[state.currentSetIndex];
+        renderScoreRow(scoreRow2El, 'large',
+          currentSet.gamesTeam1, currentSet.gamesTeam2);
+      }
+    }
+    // Tiebreak badge
+    if (state.isTiebreak) {
+      badgeEl.textContent = 'TIEBREAK';
+      badgeEl.classList.remove('hidden');
+    }
+  } else if (format === 'TOTAL_GAMES') {
+    renderGameDots(state, config.totalGames);
+    formatLabelEl.textContent = 'Total ' + config.totalGames + ' Games';
+    var gamesWon1 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam1; }, 0);
+    var gamesWon2 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam2; }, 0);
+    renderScoreRow(scoreRow1El, 'large', gamesWon1, gamesWon2);
+    if (isDraw) {
+      badgeEl.textContent = 'DRAW';
+      badgeEl.classList.remove('hidden');
+    }
+  } else if (format === 'FIXED_POINT') {
+    formatLabelEl.textContent = config.totalPoints + ' Points';
+    var played = state.sets[0].gamesTeam1 + state.sets[0].gamesTeam2;
+    if (played > config.totalPoints) {
+      badgeEl.textContent = 'TIEBREAK';
+      badgeEl.classList.remove('hidden');
+    }
+    if (isDraw) {
+      badgeEl.textContent = 'DRAW';
+      badgeEl.classList.remove('hidden');
+    }
+    if (isOver) {
+      renderScoreRow(scoreRow1El, 'large',
+        state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+    }
+  }
+
+  // Deuce badge (Classic/Total Games only)
+  if (state.isDeuce && !state.advantageTeam && format !== 'FIXED_POINT') {
+    badgeEl.textContent = 'DEUCE';
+    badgeEl.classList.remove('hidden');
+  }
+}
+
+function renderScoreRow(container, size, score1, score2) {
+  container.className = 'score-row ' + size;
+  container.innerHTML = '';
+
+  var s1 = document.createElement('span');
   s1.className = 'score-team1';
   s1.textContent = score1;
 
-  const sep = document.createElement('span');
+  var sep = document.createElement('span');
   sep.className = 'score-separator';
-  sep.textContent = '\u2013';
+  sep.textContent = '\u00B7';
 
-  const s2 = document.createElement('span');
+  var s2 = document.createElement('span');
   s2.className = 'score-team2';
   s2.textContent = score2;
 
-  scoreRowEl.appendChild(s1);
-  scoreRowEl.appendChild(sep);
-  scoreRowEl.appendChild(s2);
+  container.appendChild(s1);
+  container.appendChild(sep);
+  container.appendChild(s2);
 }
 
-function renderDots(state, config, format) {
+function renderGameDots(state, totalCount) {
   dotsRowEl.innerHTML = '';
-
-  if (format === 'CLASSIC') {
-    if (config.bestOfSets === 1) {
-      // Game dots for single-set mode
-      const totalGames = config.gamesPerSet * 2 - 1;
-      const gameWinners = state.gameWinners || [];
-      for (let i = 0; i < totalGames; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        if (i < gameWinners.length) {
-          dot.classList.add(gameWinners[i] === 'TEAM_1' ? 'team1-won' : 'team2-won');
-        } else if (i === gameWinners.length && !state.isMatchOver) {
-          dot.classList.add('current');
-        }
-        dotsRowEl.appendChild(dot);
-      }
-    } else {
-      // Set dots
-      for (let i = 0; i < config.bestOfSets; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        if (i < state.sets.length && state.sets[i].isComplete) {
-          dot.classList.add(state.sets[i].winner === 'TEAM_1' ? 'team1-won' : 'team2-won');
-        } else if (i === state.currentSetIndex && !state.isMatchOver) {
-          dot.classList.add('current');
-        }
-        dotsRowEl.appendChild(dot);
-      }
+  var gameWinners = state.gameWinners || [];
+  for (var i = 0; i < totalCount; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < gameWinners.length) {
+      dot.classList.add(gameWinners[i] === 'TEAM_1' ? 'team1-won' : 'team2-won');
+    } else if (i === gameWinners.length && !state.isMatchOver) {
+      dot.classList.add('current');
     }
-  } else if (format === 'TOTAL_GAMES') {
-    const gameWinners = state.gameWinners || [];
-    for (let i = 0; i < config.totalGames; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'dot';
-      if (i < gameWinners.length) {
-        dot.classList.add(gameWinners[i] === 'TEAM_1' ? 'team1-won' : 'team2-won');
-      } else if (i === gameWinners.length && !state.isMatchOver) {
-        dot.classList.add('current');
-      }
-      dotsRowEl.appendChild(dot);
-    }
+    dotsRowEl.appendChild(dot);
   }
-  // Fixed point: no dots
+}
+
+function renderSetDots(state, bestOfSets) {
+  dotsRowEl.innerHTML = '';
+  for (var i = 0; i < bestOfSets; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'dot';
+    if (i < state.sets.length && state.sets[i].isComplete) {
+      dot.classList.add(state.sets[i].winner === 'TEAM_1' ? 'team1-won' : 'team2-won');
+    } else if (i === state.currentSetIndex && !state.isMatchOver) {
+      dot.classList.add('current');
+    }
+    dotsRowEl.appendChild(dot);
+  }
 }
 
 function pointDisplayValue(point) {

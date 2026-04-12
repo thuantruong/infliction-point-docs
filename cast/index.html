@@ -4,27 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Infliction Point Cast Receiver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="receiver.css">
   <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
 <body>
   <div id="scoreboard" class="hidden">
     <div id="team1" class="team-panel team1-bg">
-      <div class="team-label">TEAM 1</div>
-      <div id="points1" class="points">0</div>
-      <div id="serve1" class="serve-indicator hidden"></div>
-      <div id="winner1" class="winner-crown hidden"></div>
+      <div id="serve1" class="serve-ball hidden"></div>
+      <div id="score-container1" class="score-container">
+        <div id="points1" class="points">0</div>
+        <div id="label1" class="team-label-pill team1-pill">TEAM 1</div>
+      </div>
+      <div id="medal1" class="medal hidden">&#9733;</div>
     </div>
     <div id="center-overlay">
-      <div id="format-label" class="format-label"></div>
-      <div id="score-row" class="score-row"></div>
       <div id="dots-row" class="dots-row"></div>
+      <div id="format-label" class="format-label"></div>
+      <div id="score-row-1" class="score-row"></div>
+      <div id="score-row-label" class="score-row-label hidden"></div>
+      <div id="score-row-2" class="score-row"></div>
+      <div id="badge" class="badge hidden"></div>
     </div>
     <div id="team2" class="team-panel team2-bg">
-      <div class="team-label">TEAM 2</div>
-      <div id="points2" class="points">0</div>
-      <div id="serve2" class="serve-indicator hidden"></div>
-      <div id="winner2" class="winner-crown hidden"></div>
+      <div id="serve2" class="serve-ball hidden"></div>
+      <div id="score-container2" class="score-container">
+        <div id="points2" class="points">0</div>
+        <div id="label2" class="team-label-pill team2-pill">TEAM 2</div>
+      </div>
+      <div id="medal2" class="medal hidden">&#9733;</div>
     </div>
   </div>
 
