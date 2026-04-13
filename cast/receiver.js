@@ -6,7 +6,8 @@ const scoreboardEl = document.getElementById('scoreboard');
 const idleEl = document.getElementById('idle');
 const idleDefaultEl = document.getElementById('idle-default');
 const slideshowEl = document.getElementById('slideshow');
-const slideImgEl = document.getElementById('slide-img');
+const slideImgA = document.getElementById('slide-img-a');
+const slideImgB = document.getElementById('slide-img-b');
 const playerEl = document.getElementById('player');
 
 // Team panel elements
@@ -43,6 +44,7 @@ var slideshowBaseUrl = null;
 var currentSlideIndex = -1;
 var imageTimer = null;
 var videoPlaying = false;
+var activeImg = null; // which img element is currently visible (A or B)
 
 function isVideoSrc(src) {
   return /\.(mp4|webm|ogg)$/i.test(src);
@@ -61,8 +63,11 @@ function stopSlideshow() {
   slideshowData = null;
   slideshowBaseUrl = null;
   currentSlideIndex = -1;
-  slideImgEl.classList.remove('visible');
-  slideImgEl.removeAttribute('src');
+  slideImgA.classList.remove('visible');
+  slideImgA.removeAttribute('src');
+  slideImgB.classList.remove('visible');
+  slideImgB.removeAttribute('src');
+  activeImg = null;
   playerEl.classList.add('hidden');
   slideshowEl.classList.add('hidden');
 }
@@ -109,21 +114,28 @@ function showImage(src, duration) {
   }
   playerEl.classList.add('hidden');
 
-  // Fade out current image
-  slideImgEl.classList.remove('visible');
+  // Pick the inactive image element for the next slide
+  var nextImg = (activeImg === slideImgA) ? slideImgB : slideImgA;
+  var prevImg = activeImg;
 
-  // Pre-load new image, then fade in
+  // Pre-load new image, then crossfade
   var preload = new Image();
   preload.onload = function() {
     if (!slideshowActive) return;
-    slideImgEl.src = src;
-    // Small delay to ensure the browser has painted the new src before fading in
+    nextImg.src = src;
     requestAnimationFrame(function() {
-      slideImgEl.classList.add('visible');
+      // Bring next image to front and fade it in
+      nextImg.style.zIndex = '2';
+      nextImg.classList.add('visible');
+      // Fade out previous image behind
+      if (prevImg) {
+        prevImg.style.zIndex = '1';
+        prevImg.classList.remove('visible');
+      }
+      activeImg = nextImg;
     });
   };
   preload.onerror = function() {
-    // Skip broken images
     if (slideshowActive) {
       imageTimer = setTimeout(showNextSlide, 1000);
     }
@@ -138,8 +150,10 @@ function showImage(src, duration) {
 }
 
 function showVideo(src) {
-  // Hide image
-  slideImgEl.classList.remove('visible');
+  // Hide both images
+  slideImgA.classList.remove('visible');
+  slideImgB.classList.remove('visible');
+  activeImg = null;
 
   // Show player
   playerEl.classList.remove('hidden');
