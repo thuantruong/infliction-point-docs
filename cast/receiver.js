@@ -32,10 +32,57 @@ const badgeEl = document.getElementById('badge');
 const castContext = cast.framework.CastReceiverContext.getInstance();
 const playerManager = castContext.getPlayerManager();
 
+// Auto-advance images: when a new media item loads, check if it's an image
+// and set a timer to skip to the next queue item after its duration
+playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPLETE, function() {
+  if (imageTimer) {
+    clearTimeout(imageTimer);
+    imageTimer = null;
+  }
+  if (!slideshowActive || !currentSlideData) return;
+
+  var mediaInfo = playerManager.getMediaInformation();
+  if (!mediaInfo || !mediaInfo.contentUrl) return;
+
+  // Check if current item is an image (not a video)
+  if (!isVideoSrc(mediaInfo.contentUrl)) {
+    // Find matching slide to get its duration
+    var duration = 10;
+    for (var i = 0; i < currentSlideData.slides.length; i++) {
+      var slide = currentSlideData.slides[i];
+      if (mediaInfo.contentUrl.indexOf(slide.src) !== -1) {
+        duration = slide.duration || 10;
+        break;
+      }
+    }
+    imageTimer = setTimeout(function() {
+      if (slideshowActive) {
+        // Queue next item in the queue
+        var queueManager = playerManager.getQueueManager();
+        if (queueManager) {
+          var items = queueManager.getItems();
+          var currentItemId = queueManager.getCurrentItem() && queueManager.getCurrentItem().itemId;
+          var currentIndex = -1;
+          for (var j = 0; j < items.length; j++) {
+            if (items[j].itemId === currentItemId) {
+              currentIndex = j;
+              break;
+            }
+          }
+          var nextIndex = (currentIndex + 1) % items.length;
+          queueManager.jump(items[nextIndex].itemId);
+        }
+      }
+    }, duration * 1000);
+  }
+});
+
 // --- Slideshow state ---
 
 var currentPlaylistUrl = null;
 var slideshowActive = false;
+var imageTimer = null;
+var currentSlideData = null; // reference to playlist data for duration lookup
 
 function isVideoSrc(src) {
   return /\.(mp4|webm|ogg)$/i.test(src);
@@ -55,13 +102,27 @@ function getContentType(src) {
   }
 }
 
-function stopSlideshow() {
+function pauseSlideshow() {
+  if (imageTimer) {
+    clearTimeout(imageTimer);
+    imageTimer = null;
+  }
   if (slideshowActive) {
-    try {
-      playerManager.stop();
-    } catch (e) {}
+    try { playerManager.pause(); } catch (e) {}
+  }
+  playerEl.classList.add('hidden');
+}
+
+function stopSlideshow() {
+  if (imageTimer) {
+    clearTimeout(imageTimer);
+    imageTimer = null;
+  }
+  if (slideshowActive) {
+    try { playerManager.stop(); } catch (e) {}
     slideshowActive = false;
   }
+  currentSlideData = null;
   playerEl.classList.add('hidden');
 }
 
@@ -87,11 +148,10 @@ function startSlideshow(data, baseUrl) {
     var queueItem = new cast.framework.messages.QueueItem();
     queueItem.media = mediaInfo;
     queueItem.autoplay = true;
-    if (!isVideoSrc(slide.src)) {
-      queueItem.playbackDuration = slide.duration || 10;
-    }
     return queueItem;
   });
+
+  currentSlideData = data;
 
   // Load the queue with repeat-all
   var loadRequestData = new cast.framework.messages.LoadRequestData();
@@ -103,12 +163,45 @@ function startSlideshow(data, baseUrl) {
   slideshowActive = true;
 }
 
+function resumeSlideshow() {
+  idleDefaultEl.classList.add('hidden');
+  playerEl.classList.remove('hidden');
+  try { playerManager.play(); } catch (e) {}
+  // Re-trigger image timer if current item is an image
+  var mediaInfo = playerManager.getMediaInformation();
+  if (mediaInfo && mediaInfo.contentUrl && !isVideoSrc(mediaInfo.contentUrl) && currentSlideData) {
+    var duration = 10;
+    for (var i = 0; i < currentSlideData.slides.length; i++) {
+      if (mediaInfo.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
+        duration = currentSlideData.slides[i].duration || 10;
+        break;
+      }
+    }
+    imageTimer = setTimeout(function() {
+      if (slideshowActive) {
+        var queueManager = playerManager.getQueueManager();
+        if (queueManager) {
+          var items = queueManager.getItems();
+          var currentItem = queueManager.getCurrentItem();
+          var currentItemId = currentItem && currentItem.itemId;
+          var currentIndex = -1;
+          for (var j = 0; j < items.length; j++) {
+            if (items[j].itemId === currentItemId) { currentIndex = j; break; }
+          }
+          var nextIndex = (currentIndex + 1) % items.length;
+          queueManager.jump(items[nextIndex].itemId);
+        }
+      }
+    }, duration * 1000);
+  }
+}
+
 function showIdle(playlistUrl) {
-  stopSlideshow();
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
   if (!playlistUrl) {
+    stopSlideshow();
     currentPlaylistUrl = null;
     showIdleDefault();
     return;
@@ -116,8 +209,14 @@ function showIdle(playlistUrl) {
 
   var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
 
-  // Same URL and slideshow was active: restart queue
-  // (Can't resume a stopped queue, so always refetch is fine — playlist.json is tiny)
+  // Same URL: resume paused slideshow
+  if (baseUrl === currentPlaylistUrl && slideshowActive) {
+    resumeSlideshow();
+    return;
+  }
+
+  // Different URL: stop old, fetch new
+  stopSlideshow();
   currentPlaylistUrl = baseUrl;
 
   fetch(baseUrl + 'playlist.json')
@@ -138,7 +237,7 @@ function showIdle(playlistUrl) {
 }
 
 function showScoreboard() {
-  stopSlideshow();
+  pauseSlideshow();
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
