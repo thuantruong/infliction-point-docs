@@ -224,8 +224,10 @@ cast-media-player {
   --progress-color: transparent;
   --splash-image: none;
   --background-color: black;
+  transition: opacity 0.5s ease-in-out;
 }
 
 #player {
   --controls-display: none;
+  --buffering-display: none;
 }

@@ -39,39 +39,28 @@ playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPL
     clearTimeout(imageTimer);
     imageTimer = null;
   }
-  if (!slideshowActive || !currentSlideData) return;
+
+  if (!slideshowActive) return;
 
   var mediaInfo = playerManager.getMediaInformation();
-  if (!mediaInfo || !mediaInfo.contentUrl) return;
+  if (!mediaInfo) return;
 
-  // Check if current item is an image (not a video)
-  if (!isVideoSrc(mediaInfo.contentUrl)) {
-    // Find matching slide to get its duration
+  var isImage = mediaInfo.contentType && mediaInfo.contentType.startsWith('image/');
+
+  if (isImage) {
     var duration = 10;
-    for (var i = 0; i < currentSlideData.slides.length; i++) {
-      var slide = currentSlideData.slides[i];
-      if (mediaInfo.contentUrl.indexOf(slide.src) !== -1) {
-        duration = slide.duration || 10;
-        break;
+    if (currentSlideData && currentSlideData.slides) {
+      var currentUrl = mediaInfo.contentUrl;
+      for (var i = 0; i < currentSlideData.slides.length; i++) {
+        if (currentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
+          duration = currentSlideData.slides[i].duration || 10;
+          break;
+        }
       }
     }
     imageTimer = setTimeout(function() {
       if (slideshowActive) {
-        // Queue next item in the queue
-        var queueManager = playerManager.getQueueManager();
-        if (queueManager) {
-          var items = queueManager.getItems();
-          var currentItemId = queueManager.getCurrentItem() && queueManager.getCurrentItem().itemId;
-          var currentIndex = -1;
-          for (var j = 0; j < items.length; j++) {
-            if (items[j].itemId === currentItemId) {
-              currentIndex = j;
-              break;
-            }
-          }
-          var nextIndex = (currentIndex + 1) % items.length;
-          queueManager.jump(items[nextIndex].itemId);
-        }
+        playerManager.getQueueManager().next();
       }
     }, duration * 1000);
   }
@@ -159,7 +148,9 @@ function startSlideshow(data, baseUrl) {
   loadRequestData.queueData.items = queueItems;
   loadRequestData.queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
 
-  playerManager.load(loadRequestData);
+  playerManager.load(loadRequestData).then(function() {
+    playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
+  });
   slideshowActive = true;
 }
 
@@ -169,28 +160,18 @@ function resumeSlideshow() {
   try { playerManager.play(); } catch (e) {}
   // Re-trigger image timer if current item is an image
   var mediaInfo = playerManager.getMediaInformation();
-  if (mediaInfo && mediaInfo.contentUrl && !isVideoSrc(mediaInfo.contentUrl) && currentSlideData) {
+  if (mediaInfo && mediaInfo.contentType && mediaInfo.contentType.startsWith('image/') && currentSlideData) {
     var duration = 10;
+    var currentUrl = mediaInfo.contentUrl;
     for (var i = 0; i < currentSlideData.slides.length; i++) {
-      if (mediaInfo.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
+      if (currentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
         duration = currentSlideData.slides[i].duration || 10;
         break;
       }
     }
     imageTimer = setTimeout(function() {
       if (slideshowActive) {
-        var queueManager = playerManager.getQueueManager();
-        if (queueManager) {
-          var items = queueManager.getItems();
-          var currentItem = queueManager.getCurrentItem();
-          var currentItemId = currentItem && currentItem.itemId;
-          var currentIndex = -1;
-          for (var j = 0; j < items.length; j++) {
-            if (items[j].itemId === currentItemId) { currentIndex = j; break; }
-          }
-          var nextIndex = (currentIndex + 1) % items.length;
-          queueManager.jump(items[nextIndex].itemId);
-        }
+        playerManager.getQueueManager().next();
       }
     }, duration * 1000);
   }
