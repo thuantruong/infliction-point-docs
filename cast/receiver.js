@@ -258,17 +258,15 @@ function renderTeamPanels(state, format) {
   } else if (state.isTiebreak) {
     text1 = state.tiebreakPointsTeam1;
     text2 = state.tiebreakPointsTeam2;
+  } else if (state.advantageTeam === 'TEAM_1') {
+    text1 = 'AD';
+    text2 = '\u2014';
+  } else if (state.advantageTeam === 'TEAM_2') {
+    text1 = '\u2014';
+    text2 = 'AD';
   } else if (state.isDeuce) {
-    if (state.advantageTeam === 'TEAM_1') {
-      text1 = 'AD';
-      text2 = '\u2014';
-    } else if (state.advantageTeam === 'TEAM_2') {
-      text1 = '\u2014';
-      text2 = 'AD';
-    } else {
-      text1 = '40';
-      text2 = '40';
-    }
+    text1 = '40';
+    text2 = '40';
   } else {
     text1 = pointDisplayValue(state.pointsTeam1);
     text2 = pointDisplayValue(state.pointsTeam2);
