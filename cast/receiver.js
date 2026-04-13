@@ -41,24 +41,34 @@ playerManager.addEventListener(cast.framework.events.EventType.MEDIA_STATUS, fun
 
   if (!slideshowActive) return;
 
-  var media = event.mediaStatus.media;
-  var playerState = event.mediaStatus.playerState;
-
-  if (media && media.contentType && media.contentType.startsWith('image/') && playerState === 'PLAYING') {
-    var duration = 10;
-    if (currentSlideData && currentSlideData.slides) {
-      for (var i = 0; i < currentSlideData.slides.length; i++) {
-        if (media.contentUrl && media.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
-          duration = currentSlideData.slides[i].duration || 10;
-          break;
+  var status = event.mediaStatus;
+  if (status.playerState === cast.framework.messages.PlayerState.PLAYING) {
+    var media = status.media;
+    if (media && media.contentType && media.contentType.startsWith('image/')) {
+      var duration = 10;
+      if (currentSlideData && currentSlideData.slides) {
+        for (var i = 0; i < currentSlideData.slides.length; i++) {
+          if (media.contentUrl && media.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
+            duration = currentSlideData.slides[i].duration || 10;
+            break;
+          }
         }
       }
+      imageTimer = setTimeout(function() {
+        if (!slideshowActive) return;
+        var queueManager = playerManager.getQueueManager();
+        var items = queueManager.getItems();
+        var currentItem = queueManager.getCurrentItem();
+        if (items && items.length > 1 && currentItem) {
+          var currentIndex = -1;
+          for (var j = 0; j < items.length; j++) {
+            if (items[j].itemId === currentItem.itemId) { currentIndex = j; break; }
+          }
+          var nextIndex = (currentIndex + 1) % items.length;
+          queueManager.jump(items[nextIndex].itemId);
+        }
+      }, duration * 1000);
     }
-    imageTimer = setTimeout(function() {
-      if (slideshowActive) {
-        playerManager.getQueueManager().next();
-      }
-    }, duration * 1000);
   }
 });
 
@@ -114,7 +124,11 @@ function startSlideshow(data, baseUrl) {
     var mediaInfo = new cast.framework.messages.MediaInformation();
     mediaInfo.contentUrl = baseUrl + slide.src;
     mediaInfo.contentType = getContentType(slide.src);
-    mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
+
+    if (!isVideoSrc(slide.src)) {
+      mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
+      mediaInfo.duration = slide.duration || 10;
+    }
 
     var queueItem = new cast.framework.messages.QueueItem();
     queueItem.media = mediaInfo;
@@ -124,9 +138,12 @@ function startSlideshow(data, baseUrl) {
   });
 
   var loadRequestData = new cast.framework.messages.LoadRequestData();
-  loadRequestData.queueData = new cast.framework.messages.QueueData();
-  loadRequestData.queueData.items = queueItems;
-  loadRequestData.queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
+  loadRequestData.autoplay = true;
+  var queueData = new cast.framework.messages.QueueData();
+  queueData.items = queueItems;
+  queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
+  queueData.startIndex = 0;
+  loadRequestData.queueData = queueData;
 
   playerManager.load(loadRequestData).then(function() {
     slideshowActive = true;
