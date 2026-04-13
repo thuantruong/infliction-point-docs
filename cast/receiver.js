@@ -5,6 +5,8 @@ const NAMESPACE = 'urn:x-cast:dev.2an.inflictionpoint.score';
 const scoreboardEl = document.getElementById('scoreboard');
 const idleEl = document.getElementById('idle');
 const idleDefaultEl = document.getElementById('idle-default');
+const slideshowEl = document.getElementById('slideshow');
+const slideImgEl = document.getElementById('slide-img');
 const playerEl = document.getElementById('player');
 
 // Team panel elements
@@ -32,55 +34,18 @@ const badgeEl = document.getElementById('badge');
 const castContext = cast.framework.CastReceiverContext.getInstance();
 const playerManager = castContext.getPlayerManager();
 
-// Auto-advance images via MEDIA_STATUS event
-playerManager.addEventListener(cast.framework.events.EventType.MEDIA_STATUS, function(event) {
-  if (imageTimer) {
-    clearTimeout(imageTimer);
-    imageTimer = null;
-  }
-
-  if (!slideshowActive) return;
-
-  var status = event.mediaStatus;
-  if (status.playerState === cast.framework.messages.PlayerState.PLAYING) {
-    var media = status.media;
-    if (media && media.contentType && media.contentType.startsWith('image/')) {
-      var duration = 10;
-      if (currentSlideData && currentSlideData.slides) {
-        for (var i = 0; i < currentSlideData.slides.length; i++) {
-          if (media.contentUrl && media.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
-            duration = currentSlideData.slides[i].duration || 10;
-            break;
-          }
-        }
-      }
-      imageTimer = setTimeout(function() {
-        if (!slideshowActive) return;
-        playerManager.getQueueManager().next();
-      }, duration * 1000);
-    }
-  }
-});
-
 // --- Slideshow state ---
 
 var currentPlaylistUrl = null;
 var slideshowActive = false;
+var slideshowData = null;
+var slideshowBaseUrl = null;
+var currentSlideIndex = -1;
 var imageTimer = null;
-var currentSlideData = null; // reference to playlist data for duration lookup
+var videoPlaying = false;
 
 function isVideoSrc(src) {
   return /\.(mp4|webm|ogg)$/i.test(src);
-}
-
-function getContentType(src) {
-  if (isVideoSrc(src)) return 'video/mp4';
-  var ext = src.split('.').pop().toLowerCase();
-  switch (ext) {
-    case 'webp': return 'image/webp';
-    case 'png': return 'image/png';
-    default: return 'image/jpeg';
-  }
 }
 
 function stopSlideshow() {
@@ -88,12 +53,18 @@ function stopSlideshow() {
     clearTimeout(imageTimer);
     imageTimer = null;
   }
-  if (slideshowActive) {
+  if (videoPlaying) {
     try { playerManager.stop(); } catch (e) {}
-    slideshowActive = false;
+    videoPlaying = false;
   }
-  currentSlideData = null;
+  slideshowActive = false;
+  slideshowData = null;
+  slideshowBaseUrl = null;
+  currentSlideIndex = -1;
+  slideImgEl.classList.remove('visible');
+  slideImgEl.removeAttribute('src');
   playerEl.classList.add('hidden');
+  slideshowEl.classList.add('hidden');
 }
 
 function showIdleDefault() {
@@ -103,37 +74,107 @@ function showIdleDefault() {
 
 function startSlideshow(data, baseUrl) {
   idleDefaultEl.classList.add('hidden');
+  slideshowEl.classList.remove('hidden');
+
+  if (data.backgroundColor) {
+    slideshowEl.style.backgroundColor = data.backgroundColor;
+  }
+
+  slideshowData = data;
+  slideshowBaseUrl = baseUrl;
+  slideshowActive = true;
+  currentSlideIndex = -1;
+  showNextSlide();
+}
+
+function showNextSlide() {
+  if (!slideshowActive || !slideshowData || !slideshowData.slides.length) return;
+
+  currentSlideIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
+  var slide = slideshowData.slides[currentSlideIndex];
+  var src = slideshowBaseUrl + slide.src;
+
+  if (isVideoSrc(slide.src)) {
+    showVideo(src);
+  } else {
+    showImage(src, slide.duration || 10);
+  }
+}
+
+function showImage(src, duration) {
+  // Stop any playing video
+  if (videoPlaying) {
+    try { playerManager.stop(); } catch (e) {}
+    videoPlaying = false;
+  }
+  playerEl.classList.add('hidden');
+
+  // Fade out current image
+  slideImgEl.classList.remove('visible');
+
+  // Pre-load new image, then fade in
+  var preload = new Image();
+  preload.onload = function() {
+    if (!slideshowActive) return;
+    slideImgEl.src = src;
+    // Small delay to ensure the browser has painted the new src before fading in
+    requestAnimationFrame(function() {
+      slideImgEl.classList.add('visible');
+    });
+  };
+  preload.onerror = function() {
+    // Skip broken images
+    if (slideshowActive) {
+      imageTimer = setTimeout(showNextSlide, 1000);
+    }
+  };
+  preload.src = src;
+
+  // Set timer for next slide
+  if (imageTimer) clearTimeout(imageTimer);
+  imageTimer = setTimeout(function() {
+    if (slideshowActive) showNextSlide();
+  }, duration * 1000);
+}
+
+function showVideo(src) {
+  // Hide image
+  slideImgEl.classList.remove('visible');
+
+  // Show player
   playerEl.classList.remove('hidden');
-  currentSlideData = data;
+  videoPlaying = true;
 
-  var queueItems = data.slides.map(function(slide) {
-    var mediaInfo = new cast.framework.messages.MediaInformation();
-    mediaInfo.contentUrl = baseUrl + slide.src;
-    mediaInfo.contentType = getContentType(slide.src);
-    mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
+  // Clear image timer
+  if (imageTimer) {
+    clearTimeout(imageTimer);
+    imageTimer = null;
+  }
 
-    var metadata = new cast.framework.messages.GenericMediaMetadata();
-    metadata.title = 'Infliction Point';
-    mediaInfo.metadata = metadata;
-
-    var queueItem = new cast.framework.messages.QueueItem();
-    queueItem.media = mediaInfo;
-    queueItem.autoplay = true;
-    queueItem.preloadTime = 3;
-    return queueItem;
-  });
+  // Load single video via Cast SDK
+  var mediaInfo = new cast.framework.messages.MediaInformation();
+  mediaInfo.contentUrl = src;
+  mediaInfo.contentType = 'video/mp4';
+  mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
 
   var loadRequestData = new cast.framework.messages.LoadRequestData();
-  var queueData = new cast.framework.messages.QueueData();
-  queueData.items = queueItems;
-  queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
-  loadRequestData.queueData = queueData;
+  loadRequestData.media = mediaInfo;
+  loadRequestData.autoplay = true;
 
-  playerManager.load(loadRequestData).then(function() {
-    slideshowActive = true;
-    playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
+  playerManager.load(loadRequestData).catch(function() {
+    // Video failed — skip to next slide
+    videoPlaying = false;
+    if (slideshowActive) showNextSlide();
   });
 }
+
+// Advance to next slide when video ends
+playerManager.addEventListener(cast.framework.events.EventType.MEDIA_FINISHED, function() {
+  if (slideshowActive && videoPlaying) {
+    videoPlaying = false;
+    showNextSlide();
+  }
+});
 
 function showIdle(playlistUrl) {
   stopSlideshow();
@@ -153,9 +194,6 @@ function showIdle(playlistUrl) {
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data && data.slides && data.slides.length > 0) {
-        if (data.backgroundColor) {
-          playerEl.style.setProperty('--background-color', data.backgroundColor);
-        }
         startSlideshow(data, baseUrl);
       } else {
         showIdleDefault();
@@ -167,12 +205,7 @@ function showIdle(playlistUrl) {
 }
 
 function showScoreboard() {
-  slideshowActive = false;
-  if (imageTimer) {
-    clearTimeout(imageTimer);
-    imageTimer = null;
-  }
-  try { playerManager.stop(); } catch (e) {}
+  stopSlideshow();
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
@@ -185,10 +218,7 @@ function renderMatchState(state) {
   var config = state.config;
   var format = config.matchFormat;
 
-  // --- Team panels: big score text ---
   renderTeamPanels(state, format);
-
-  // --- Center overlay ---
   renderCenterOverlay(state, config, format);
 }
 
@@ -197,18 +227,15 @@ function renderTeamPanels(state, format) {
   var winner = state.matchWinner;
   var isDraw = isOver && !winner;
 
-  // Serve indicators
   serve1El.classList.toggle('hidden', state.servingTeam !== 'TEAM_1' || isOver);
   serve2El.classList.toggle('hidden', state.servingTeam !== 'TEAM_2' || isOver);
 
-  // Determine big score text for each team
   var text1, text2;
 
   if (isDraw) {
     text1 = '\u2014';
     text2 = '\u2014';
   } else if (isOver && winner) {
-    // Winner gets trophy + team label, loser gets nothing
     if (winner === 'TEAM_1') {
       scoreContainer1El.classList.add('hidden');
       medal1El.classList.remove('hidden');
@@ -247,7 +274,6 @@ function renderTeamPanels(state, format) {
     text2 = pointDisplayValue(state.pointsTeam2);
   }
 
-  // Show score containers, hide medals
   scoreContainer1El.classList.remove('hidden');
   scoreContainer2El.classList.remove('hidden');
   medal1El.classList.add('hidden');
@@ -260,7 +286,6 @@ function renderTeamPanels(state, format) {
 }
 
 function renderCenterOverlay(state, config, format) {
-  // Clear all
   dotsRowEl.innerHTML = '';
   scoreRow1El.innerHTML = '';
   scoreRow1El.className = 'score-row';
@@ -275,13 +300,11 @@ function renderCenterOverlay(state, config, format) {
 
   if (format === 'CLASSIC') {
     if (config.bestOfSets === 1) {
-      // Single-set: game dots + game score
       renderGameDots(state, config.gamesPerSet * 2 - 1);
       formatLabelEl.textContent = 'Games to ' + config.gamesPerSet;
       renderScoreRow(scoreRow1El, 'large',
         state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
     } else {
-      // Multi-set: set dots + sets score + games score
       renderSetDots(state, config.bestOfSets);
       formatLabelEl.textContent = 'Best of ' + config.bestOfSets + ' Sets';
       var setsWon1 = state.sets.filter(function(s) { return s.winner === 'TEAM_1'; }).length;
@@ -296,7 +319,6 @@ function renderCenterOverlay(state, config, format) {
           currentSet.gamesTeam1, currentSet.gamesTeam2);
       }
     }
-    // Tiebreak badge
     if (state.isTiebreak) {
       badgeEl.textContent = 'TIEBREAK';
       badgeEl.classList.remove('hidden');
@@ -328,7 +350,6 @@ function renderCenterOverlay(state, config, format) {
     }
   }
 
-  // Deuce badge (Classic/Total Games only)
   if (state.isDeuce && !state.advantageTeam && format !== 'FIXED_POINT') {
     badgeEl.textContent = 'DEUCE';
     badgeEl.classList.remove('hidden');
@@ -413,24 +434,11 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
   }
 });
 
-// Show idle on sender disconnect
 castContext.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, function(event) {
   if (castContext.getSenders().length === 0) {
     showIdle(null);
   }
 });
-
-// Force autoplay and buffered stream type for all loaded media
-playerManager.setMessageInterceptor(
-  cast.framework.messages.MessageType.LOAD,
-  function(loadRequestData) {
-    loadRequestData.autoplay = true;
-    if (loadRequestData.media) {
-      loadRequestData.media.streamType = cast.framework.messages.StreamType.BUFFERED;
-    }
-    return loadRequestData;
-  }
-);
 
 // Start receiver
 var options = new cast.framework.CastReceiverOptions();

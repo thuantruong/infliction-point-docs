@@ -38,8 +38,6 @@ html, body {
 .team1-bg { background: #1A3A5C; }
 .team2-bg { background: #5C2A0E; }
 
-/* --- Score Container (points + label pill) --- */
-
 .score-container {
   display: flex;
   flex-direction: column;
@@ -75,8 +73,6 @@ html, body {
 .team1-pill { background: rgba(21, 101, 192, 0.25); }
 .team2-pill { background: rgba(230, 81, 0, 0.25); }
 
-/* --- Serve Indicator (large semi-transparent circle) --- */
-
 .serve-ball {
   position: absolute;
   width: 12vw;
@@ -91,8 +87,6 @@ html, body {
 
 #team1 .serve-ball { left: -3vw; }
 #team2 .serve-ball { right: -3vw; }
-
-/* --- Winner Medal --- */
 
 .medal {
   display: flex;
@@ -216,7 +210,30 @@ html, body {
   object-fit: contain;
 }
 
-/* --- Cast Media Player (slideshow) --- */
+/* --- Slideshow --- */
+
+#slideshow {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: black;
+}
+
+.slide-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: black;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.slide-img.visible {
+  opacity: 1;
+}
 
 cast-media-player {
   display: block;
@@ -225,7 +242,6 @@ cast-media-player {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
   background-color: black;
   --progress-color: transparent;
   --splash-image: none;
