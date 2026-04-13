@@ -482,53 +482,44 @@ function displayElement(el, slide, old) {
   currentDisplayed = el;
 
   if (el.tagName === 'VIDEO') {
-    // Start invisible — don't show until first frame is decoded
-    el.style.opacity = '0';
+    // Chromecasts cannot decode two video streams at once — destroy old video instantly
+    if (old && old.tagName === 'VIDEO') {
+      releaseElement(old);
+      old = null;
+    }
+
+    el.muted = true;
+    el.volume = 0;
     slideContainerEl.appendChild(el);
 
     var revealed = false;
-    function revealVideo() {
+    var revealVideo = function() {
       if (revealed) return;
       revealed = true;
-      el.style.opacity = '';
       el.className = 'slide-fade-in';
-      fadeOutAndRelease(old);
-    }
+      if (old) fadeOutAndRelease(old);
+      // Soft start audio after first frame is rendered
+      setTimeout(function() {
+        el.muted = false;
+        el.volume = 1;
+      }, 200);
+    };
 
-    // If already has data (pre-loaded), reveal immediately
-    if (el.readyState >= 2) {
-      revealVideo();
-    } else {
-      el.addEventListener('loadeddata', function onData() {
-        el.removeEventListener('loadeddata', onData);
-        revealVideo();
-      });
-      // Fallback: reveal after 1s even if loadeddata never fires
-      setTimeout(revealVideo, 1000);
-    }
+    el.addEventListener('playing', revealVideo, { once: true });
+
+    el.play().catch(function() {
+      if (old) fadeOutAndRelease(old);
+      slideshowTimer = setTimeout(showNextSlide, 2000);
+    });
 
     el.addEventListener('ended', function onEnded() {
       el.removeEventListener('ended', onEnded);
       showNextSlide();
     });
-    el.addEventListener('error', function onError() {
-      el.removeEventListener('error', onError);
-      fadeOutAndRelease(old);
-      slideshowTimer = setTimeout(showNextSlide, 2000);
-    });
-
-    var playPromise = el.play();
-    if (playPromise) {
-      playPromise.catch(function() {
-        fadeOutAndRelease(old);
-        slideshowTimer = setTimeout(showNextSlide, 2000);
-      });
-    }
   } else {
-    // Images: fade in immediately (already decoded from pre-load or cache)
     el.className = 'slide-fade-in';
     slideContainerEl.appendChild(el);
-    fadeOutAndRelease(old);
+    if (old) fadeOutAndRelease(old);
     var duration = (slide.duration || 10) * 1000;
     slideshowTimer = setTimeout(showNextSlide, duration);
   }
