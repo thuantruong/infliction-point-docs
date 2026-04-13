@@ -81,9 +81,10 @@ function startSlideshow(data, baseUrl) {
   idleDefaultEl.classList.add('hidden');
   slideshowEl.classList.remove('hidden');
 
-  if (data.backgroundColor) {
-    slideshowEl.style.backgroundColor = data.backgroundColor;
-  }
+  var bg = data.backgroundColor || 'black';
+  slideshowEl.style.backgroundColor = bg;
+  slideImgA.style.backgroundColor = bg;
+  slideImgB.style.backgroundColor = bg;
 
   slideshowData = data;
   slideshowBaseUrl = baseUrl;
