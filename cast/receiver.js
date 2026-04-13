@@ -123,12 +123,17 @@ function showIdleDefault() {
 function startSlideshow(data, baseUrl) {
   idleDefaultEl.classList.add('hidden');
   playerEl.classList.remove('hidden');
+  currentSlideData = data;
 
-  // Build Cast Queue Items from playlist data
   var queueItems = data.slides.map(function(slide) {
     var mediaInfo = new cast.framework.messages.MediaInformation();
     mediaInfo.contentUrl = baseUrl + slide.src;
     mediaInfo.contentType = getContentType(slide.src);
+
+    // Set duration for images so the SDK knows how long to show them
+    if (!isVideoSrc(slide.src)) {
+      mediaInfo.duration = slide.duration || 10;
+    }
 
     var metadata = new cast.framework.messages.GenericMediaMetadata();
     metadata.title = 'Infliction Point';
@@ -137,21 +142,23 @@ function startSlideshow(data, baseUrl) {
     var queueItem = new cast.framework.messages.QueueItem();
     queueItem.media = mediaInfo;
     queueItem.autoplay = true;
+    queueItem.preloadTime = 3;
     return queueItem;
   });
 
-  currentSlideData = data;
-
-  // Load the queue with repeat-all
   var loadRequestData = new cast.framework.messages.LoadRequestData();
+  loadRequestData.autoplay = true;
   loadRequestData.queueData = new cast.framework.messages.QueueData();
   loadRequestData.queueData.items = queueItems;
   loadRequestData.queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
+  loadRequestData.queueData.startIndex = 0;
 
-  playerManager.load(loadRequestData).then(function() {
-    playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
-  });
-  slideshowActive = true;
+  playerManager.load(loadRequestData)
+    .then(function() {
+      slideshowActive = true;
+      playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
+    })
+    .catch(function(err) { console.error('Load failed', err); });
 }
 
 function resumeSlideshow() {
@@ -465,6 +472,18 @@ castContext.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED
     showIdle(null);
   }
 });
+
+// Force autoplay and buffered stream type for all loaded media
+playerManager.setMessageInterceptor(
+  cast.framework.messages.MessageType.LOAD,
+  function(loadRequestData) {
+    loadRequestData.autoplay = true;
+    if (loadRequestData.media) {
+      loadRequestData.media.streamType = cast.framework.messages.StreamType.BUFFERED;
+    }
+    return loadRequestData;
+  }
+);
 
 // Start receiver
 var options = new cast.framework.CastReceiverOptions();
