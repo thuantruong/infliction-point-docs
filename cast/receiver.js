@@ -5,8 +5,7 @@ const NAMESPACE = 'urn:x-cast:dev.2an.inflictionpoint.score';
 const scoreboardEl = document.getElementById('scoreboard');
 const idleEl = document.getElementById('idle');
 const idleDefaultEl = document.getElementById('idle-default');
-const slideshowEl = document.getElementById('slideshow');
-const slideContainerEl = document.getElementById('slide-container');
+const playerEl = document.getElementById('player');
 
 // Team panel elements
 const points1El = document.getElementById('points1');
@@ -28,33 +27,106 @@ const scoreRow2El = document.getElementById('score-row-2');
 const dotsRowEl = document.getElementById('dots-row');
 const badgeEl = document.getElementById('badge');
 
+// --- Cast Receiver Setup ---
+
+const castContext = cast.framework.CastReceiverContext.getInstance();
+const playerManager = castContext.getPlayerManager();
+
+// --- Slideshow state ---
+
+var currentPlaylistUrl = null;
+var slideshowActive = false;
+
+function isVideoSrc(src) {
+  return /\.(mp4|webm|ogg)$/i.test(src);
+}
+
+function getContentType(src) {
+  var ext = src.split('.').pop().toLowerCase();
+  switch (ext) {
+    case 'mp4': return 'video/mp4';
+    case 'webm': return 'video/webm';
+    case 'ogg': return 'video/ogg';
+    case 'webp': return 'image/webp';
+    case 'png': return 'image/png';
+    case 'gif': return 'image/gif';
+    case 'svg': return 'image/svg+xml';
+    default: return 'image/jpeg';
+  }
+}
+
+function stopSlideshow() {
+  if (slideshowActive) {
+    try {
+      playerManager.stop();
+    } catch (e) {}
+    slideshowActive = false;
+  }
+  playerEl.classList.add('hidden');
+}
+
+function showIdleDefault() {
+  stopSlideshow();
+  idleDefaultEl.classList.remove('hidden');
+}
+
+function startSlideshow(data, baseUrl) {
+  idleDefaultEl.classList.add('hidden');
+  playerEl.classList.remove('hidden');
+
+  // Build Cast Queue Items from playlist data
+  var queueItems = data.slides.map(function(slide) {
+    var mediaInfo = new cast.framework.messages.MediaInformation();
+    mediaInfo.contentUrl = baseUrl + slide.src;
+    mediaInfo.contentType = getContentType(slide.src);
+
+    var metadata = new cast.framework.messages.GenericMediaMetadata();
+    metadata.title = 'Infliction Point';
+    mediaInfo.metadata = metadata;
+
+    var queueItem = new cast.framework.messages.QueueItem();
+    queueItem.media = mediaInfo;
+    queueItem.autoplay = true;
+    if (!isVideoSrc(slide.src)) {
+      queueItem.playbackDuration = slide.duration || 10;
+    }
+    return queueItem;
+  });
+
+  // Load the queue with repeat-all
+  var loadRequestData = new cast.framework.messages.LoadRequestData();
+  loadRequestData.queueData = new cast.framework.messages.QueueData();
+  loadRequestData.queueData.items = queueItems;
+  loadRequestData.queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
+
+  playerManager.load(loadRequestData);
+  slideshowActive = true;
+}
+
 function showIdle(playlistUrl) {
-  pauseSlideshow();
+  stopSlideshow();
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
   if (!playlistUrl) {
-    clearSlideshow();
+    currentPlaylistUrl = null;
     showIdleDefault();
     return;
   }
 
   var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
 
-  // Same URL: resume existing slideshow without re-fetching
-  if (baseUrl === currentPlaylistUrl && slideshowData) {
-    resumeSlideshow();
-    return;
-  }
-
-  // Different URL: clear old state and fetch new playlist
-  clearSlideshow();
+  // Same URL and slideshow was active: restart queue
+  // (Can't resume a stopped queue, so always refetch is fine — playlist.json is tiny)
   currentPlaylistUrl = baseUrl;
 
   fetch(baseUrl + 'playlist.json')
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data && data.slides && data.slides.length > 0) {
+        if (data.backgroundColor) {
+          playerEl.style.setProperty('--background-color', data.backgroundColor);
+        }
         startSlideshow(data, baseUrl);
       } else {
         showIdleDefault();
@@ -66,7 +138,7 @@ function showIdle(playlistUrl) {
 }
 
 function showScoreboard() {
-  pauseSlideshow();
+  stopSlideshow();
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
@@ -289,237 +361,7 @@ function pointDisplayValue(point) {
   }
 }
 
-// --- Slideshow ---
-
-var slideshowTimer = null;
-var slideshowData = null;
-var slideshowBaseUrl = null;
-var currentPlaylistUrl = null;
-var currentSlideIndex = -1;
-var slideshowPaused = false;
-var nextPreloaded = null;       // pre-loaded element for next slide
-var nextPreloadedIndex = -1;    // which slide index is pre-loaded
-var currentDisplayed = null;    // element currently showing
-
-function isVideoSrc(src) {
-  return /\.(mp4|webm|ogg)$/i.test(src);
-}
-
-function releaseElement(el) {
-  if (!el) return;
-  if (el.tagName === 'VIDEO') {
-    el.pause();
-    el.removeAttribute('src');
-    el.load(); // free media buffer
-  }
-  if (el.parentNode) el.parentNode.removeChild(el);
-}
-
-function pauseSlideshow() {
-  // Pause without clearing state — allows resume
-  if (slideshowTimer) {
-    clearTimeout(slideshowTimer);
-    slideshowTimer = null;
-  }
-  slideshowPaused = true;
-  // Pause any playing video
-  if (currentDisplayed && currentDisplayed.tagName === 'VIDEO') {
-    currentDisplayed.pause();
-  }
-}
-
-function clearSlideshow() {
-  // Full cleanup — releases all resources
-  if (slideshowTimer) {
-    clearTimeout(slideshowTimer);
-    slideshowTimer = null;
-  }
-  releaseElement(currentDisplayed);
-  currentDisplayed = null;
-  releaseElement(nextPreloaded);
-  nextPreloaded = null;
-  nextPreloadedIndex = -1;
-  slideshowData = null;
-  slideshowBaseUrl = null;
-  currentPlaylistUrl = null;
-  currentSlideIndex = -1;
-  slideshowPaused = false;
-  slideContainerEl.innerHTML = '';
-  slideshowEl.classList.add('hidden');
-  slideshowEl.style.backgroundColor = '';
-}
-
-function showIdleDefault() {
-  clearSlideshow();
-  idleDefaultEl.classList.remove('hidden');
-}
-
-function resumeSlideshow() {
-  if (!slideshowData || !slideshowData.slides || slideshowData.slides.length === 0) return;
-  idleDefaultEl.classList.add('hidden');
-  slideshowEl.classList.remove('hidden');
-  slideshowPaused = false;
-  // Resume current video or advance to next slide
-  if (currentDisplayed && currentDisplayed.tagName === 'VIDEO' && currentDisplayed.parentNode) {
-    var playPromise = currentDisplayed.play();
-    if (playPromise) playPromise.catch(function() {});
-  } else {
-    showNextSlide();
-  }
-}
-
-function startSlideshow(data, baseUrl) {
-  idleDefaultEl.classList.add('hidden');
-  slideshowEl.classList.remove('hidden');
-  slideshowPaused = false;
-
-  if (data.backgroundColor) {
-    slideshowEl.style.backgroundColor = data.backgroundColor;
-  }
-
-  slideshowData = data;
-  slideshowBaseUrl = baseUrl;
-  currentSlideIndex = -1;
-
-  // Pre-load first slide, then show it
-  preloadSlide(0, function(el) {
-    nextPreloaded = el;
-    nextPreloadedIndex = 0;
-    showNextSlide();
-  });
-}
-
-function preloadSlide(index, callback) {
-  if (!slideshowData || !slideshowData.slides) return;
-  var slide = slideshowData.slides[index];
-  var src = slideshowBaseUrl + slide.src;
-
-  if (isVideoSrc(slide.src)) {
-    var video = document.createElement('video');
-    video.preload = 'auto';
-    video.muted = true;
-    video.src = src;
-    video.addEventListener('canplaythrough', function onReady() {
-      video.removeEventListener('canplaythrough', onReady);
-      if (callback) callback(video);
-    }, { once: true });
-    video.load();
-  } else {
-    var img = document.createElement('img');
-    img.src = src;
-    img.onload = function() { if (callback) callback(img); };
-    img.onerror = function() { if (callback) callback(img); };
-  }
-}
-
-function showNextSlide() {
-  if (!slideshowData || !slideshowData.slides || slideshowData.slides.length === 0) return;
-  if (slideshowPaused) return;
-
-  var targetIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
-  var slide = slideshowData.slides[targetIndex];
-  currentSlideIndex = targetIndex;
-
-  // Keep old element visible until new one is ready
-  var old = currentDisplayed;
-
-  // Use pre-loaded element if available for this index
-  var el;
-  if (nextPreloaded && nextPreloadedIndex === targetIndex) {
-    el = nextPreloaded;
-    nextPreloaded = null;
-    nextPreloadedIndex = -1;
-  } else {
-    el = createElement(targetIndex);
-  }
-
-  displayElement(el, slide, old);
-
-  // Pre-load next slide (look-ahead of 1)
-  var nextIndex = (targetIndex + 1) % slideshowData.slides.length;
-  preloadSlide(nextIndex, function(preloaded) {
-    if (!slideshowPaused && slideshowData) {
-      nextPreloaded = preloaded;
-      nextPreloadedIndex = nextIndex;
-    } else {
-      releaseElement(preloaded);
-    }
-  });
-}
-
-function createElement(index) {
-  var slide = slideshowData.slides[index];
-  var src = slideshowBaseUrl + slide.src;
-  if (isVideoSrc(slide.src)) {
-    var video = document.createElement('video');
-    video.src = src;
-    video.playsInline = true;
-    video.muted = true;
-    return video;
-  } else {
-    var img = document.createElement('img');
-    img.src = src;
-    return img;
-  }
-}
-
-function fadeOutAndRelease(old) {
-  if (!old) return;
-  old.classList.remove('slide-fade-in');
-  old.classList.add('slide-fade-out');
-  setTimeout(function() { releaseElement(old); }, 800);
-}
-
-function displayElement(el, slide, old) {
-  currentDisplayed = el;
-
-  if (el.tagName === 'VIDEO') {
-    // Kill old decoder conflict: video-to-video = instant destroy, image = fade
-    if (old) {
-      if (old.tagName === 'VIDEO') {
-        releaseElement(old);
-      } else {
-        fadeOutAndRelease(old);
-      }
-      old = null;
-    }
-
-    el.muted = true;
-    el.style.opacity = '0';
-    slideContainerEl.appendChild(el);
-
-    var revealVideo = function() {
-      // 150ms settling delay prevents first-frame flicker
-      setTimeout(function() {
-        if (old) {
-          old.style.display = 'none';
-          releaseElement(old);
-        }
-        el.className = 'slide-fade-in';
-        el.style.opacity = '1';
-        // Soft audio start prevents stutter
-        setTimeout(function() {
-          el.muted = false;
-          el.volume = 1;
-        }, 150);
-      }, 150);
-    };
-
-    el.addEventListener('playing', revealVideo, { once: true });
-    el.play().catch(function() { showNextSlide(); });
-    el.addEventListener('ended', function() { showNextSlide(); }, { once: true });
-  } else {
-    el.className = 'slide-fade-in';
-    slideContainerEl.appendChild(el);
-    if (old) fadeOutAndRelease(old);
-    var duration = (slide.duration || 10) * 1000;
-    slideshowTimer = setTimeout(showNextSlide, duration);
-  }
-}
-
-// --- Cast Receiver Setup ---
-
-const castContext = cast.framework.CastReceiverContext.getInstance();
+// --- Message Handling ---
 
 castContext.addCustomMessageListener(NAMESPACE, function(event) {
   var message = event.data;
@@ -545,7 +387,7 @@ castContext.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED
 });
 
 // Start receiver
-const options = new cast.framework.CastReceiverOptions();
+var options = new cast.framework.CastReceiverOptions();
 options.disableIdleTimeout = true;
 castContext.start(options);
 

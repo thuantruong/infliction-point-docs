@@ -216,51 +216,16 @@ html, body {
   object-fit: contain;
 }
 
-/* --- Slideshow --- */
+/* --- Cast Media Player (slideshow) --- */
 
-#slideshow {
+cast-media-player {
   width: 100%;
   height: 100%;
-  position: relative;
-  background: #0E0E0E;
+  --progress-color: transparent;
+  --splash-image: none;
+  --background-color: black;
 }
 
-#slide-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background: #0E0E0E;
-}
-
-#slide-container img,
-#slide-container video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  background-color: black;
-  transform: translateZ(0);
-}
-
-.slide-fade-in {
-  z-index: 2;
-  animation: fadeIn 0.8s ease-in forwards;
-}
-
-.slide-fade-out {
-  z-index: 1;
-  animation: fadeOut 0.8s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+#player {
+  --controls-display: none;
 }
