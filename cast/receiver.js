@@ -482,40 +482,38 @@ function displayElement(el, slide, old) {
   currentDisplayed = el;
 
   if (el.tagName === 'VIDEO') {
-    // Chromecasts cannot decode two video streams at once — destroy old video instantly
+    // Video-to-video: destroy old instantly to free hardware decoder
     if (old && old.tagName === 'VIDEO') {
       releaseElement(old);
       old = null;
     }
 
     el.muted = true;
-    el.volume = 0;
+    el.style.opacity = '0';
     slideContainerEl.appendChild(el);
 
-    var revealed = false;
     var revealVideo = function() {
-      if (revealed) return;
-      revealed = true;
+      // Image-to-video: instant hide old image when video pixels exist
+      if (old) {
+        old.style.display = 'none';
+        releaseElement(old);
+      }
+      el.style.opacity = '1';
       el.className = 'slide-fade-in';
-      if (old) fadeOutAndRelease(old);
-      // Soft start audio after first frame is rendered
+      // Soft audio entry after first frame is rendered
       setTimeout(function() {
         el.muted = false;
         el.volume = 1;
-      }, 200);
+      }, 150);
     };
 
     el.addEventListener('playing', revealVideo, { once: true });
 
     el.play().catch(function() {
-      if (old) fadeOutAndRelease(old);
-      slideshowTimer = setTimeout(showNextSlide, 2000);
-    });
-
-    el.addEventListener('ended', function onEnded() {
-      el.removeEventListener('ended', onEnded);
       showNextSlide();
     });
+
+    el.addEventListener('ended', function() { showNextSlide(); }, { once: true });
   } else {
     el.className = 'slide-fade-in';
     slideContainerEl.appendChild(el);
