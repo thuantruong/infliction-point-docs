@@ -32,9 +32,8 @@ const badgeEl = document.getElementById('badge');
 const castContext = cast.framework.CastReceiverContext.getInstance();
 const playerManager = castContext.getPlayerManager();
 
-// Auto-advance images: when a new media item loads, check if it's an image
-// and set a timer to skip to the next queue item after its duration
-playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPLETE, function() {
+// Auto-advance images via MEDIA_STATUS event
+playerManager.addEventListener(cast.framework.events.EventType.MEDIA_STATUS, function(event) {
   if (imageTimer) {
     clearTimeout(imageTimer);
     imageTimer = null;
@@ -42,17 +41,14 @@ playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPL
 
   if (!slideshowActive) return;
 
-  var mediaInfo = playerManager.getMediaInformation();
-  if (!mediaInfo) return;
+  var media = event.mediaStatus.media;
+  var playerState = event.mediaStatus.playerState;
 
-  var isImage = mediaInfo.contentType && mediaInfo.contentType.startsWith('image/');
-
-  if (isImage) {
+  if (media && media.contentType && media.contentType.startsWith('image/') && playerState === 'PLAYING') {
     var duration = 10;
     if (currentSlideData && currentSlideData.slides) {
-      var currentUrl = mediaInfo.contentUrl;
       for (var i = 0; i < currentSlideData.slides.length; i++) {
-        if (currentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
+        if (media.contentUrl && media.contentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
           duration = currentSlideData.slides[i].duration || 10;
           break;
         }
@@ -91,17 +87,6 @@ function getContentType(src) {
   }
 }
 
-function pauseSlideshow() {
-  if (imageTimer) {
-    clearTimeout(imageTimer);
-    imageTimer = null;
-  }
-  if (slideshowActive) {
-    try { playerManager.pause(); } catch (e) {}
-  }
-  playerEl.classList.add('hidden');
-}
-
 function stopSlideshow() {
   if (imageTimer) {
     clearTimeout(imageTimer);
@@ -129,82 +114,38 @@ function startSlideshow(data, baseUrl) {
     var mediaInfo = new cast.framework.messages.MediaInformation();
     mediaInfo.contentUrl = baseUrl + slide.src;
     mediaInfo.contentType = getContentType(slide.src);
-
-    // Set duration for images so the SDK knows how long to show them
-    if (!isVideoSrc(slide.src)) {
-      mediaInfo.duration = slide.duration || 10;
-    }
-
-    var metadata = new cast.framework.messages.GenericMediaMetadata();
-    metadata.title = 'Infliction Point';
-    mediaInfo.metadata = metadata;
+    mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
 
     var queueItem = new cast.framework.messages.QueueItem();
     queueItem.media = mediaInfo;
     queueItem.autoplay = true;
-    queueItem.preloadTime = 3;
+    queueItem.preloadTime = 2;
     return queueItem;
   });
 
   var loadRequestData = new cast.framework.messages.LoadRequestData();
-  loadRequestData.autoplay = true;
   loadRequestData.queueData = new cast.framework.messages.QueueData();
   loadRequestData.queueData.items = queueItems;
   loadRequestData.queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
-  loadRequestData.queueData.startIndex = 0;
 
-  playerManager.load(loadRequestData)
-    .then(function() {
-      slideshowActive = true;
-      playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
-    })
-    .catch(function(err) { console.error('Load failed', err); });
-}
-
-function resumeSlideshow() {
-  idleDefaultEl.classList.add('hidden');
-  playerEl.classList.remove('hidden');
-  try { playerManager.play(); } catch (e) {}
-  // Re-trigger image timer if current item is an image
-  var mediaInfo = playerManager.getMediaInformation();
-  if (mediaInfo && mediaInfo.contentType && mediaInfo.contentType.startsWith('image/') && currentSlideData) {
-    var duration = 10;
-    var currentUrl = mediaInfo.contentUrl;
-    for (var i = 0; i < currentSlideData.slides.length; i++) {
-      if (currentUrl.indexOf(currentSlideData.slides[i].src) !== -1) {
-        duration = currentSlideData.slides[i].duration || 10;
-        break;
-      }
-    }
-    imageTimer = setTimeout(function() {
-      if (slideshowActive) {
-        playerManager.getQueueManager().next();
-      }
-    }, duration * 1000);
-  }
+  playerManager.load(loadRequestData).then(function() {
+    slideshowActive = true;
+    playerManager.setRepeatMode(cast.framework.messages.RepeatMode.ALL);
+  });
 }
 
 function showIdle(playlistUrl) {
+  stopSlideshow();
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
   if (!playlistUrl) {
-    stopSlideshow();
     currentPlaylistUrl = null;
     showIdleDefault();
     return;
   }
 
   var baseUrl = playlistUrl.endsWith('/') ? playlistUrl : playlistUrl + '/';
-
-  // Same URL: resume paused slideshow
-  if (baseUrl === currentPlaylistUrl && slideshowActive) {
-    resumeSlideshow();
-    return;
-  }
-
-  // Different URL: stop old, fetch new
-  stopSlideshow();
   currentPlaylistUrl = baseUrl;
 
   fetch(baseUrl + 'playlist.json')
@@ -225,7 +166,12 @@ function showIdle(playlistUrl) {
 }
 
 function showScoreboard() {
-  pauseSlideshow();
+  slideshowActive = false;
+  if (imageTimer) {
+    clearTimeout(imageTimer);
+    imageTimer = null;
+  }
+  try { playerManager.stop(); } catch (e) {}
   idleEl.classList.add('hidden');
   scoreboardEl.classList.remove('hidden');
 }
