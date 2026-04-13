@@ -397,26 +397,18 @@ function preloadSlide(index, callback) {
   if (isVideoSrc(slide.src)) {
     var video = document.createElement('video');
     video.preload = 'auto';
-    video.playsInline = true;
-    video.muted = false;
+    video.muted = true;
     video.src = src;
     video.addEventListener('canplaythrough', function onReady() {
       video.removeEventListener('canplaythrough', onReady);
       if (callback) callback(video);
-    });
-    video.addEventListener('error', function() {
-      if (callback) callback(video); // show anyway, will handle error on play
-    });
+    }, { once: true });
     video.load();
   } else {
     var img = document.createElement('img');
     img.src = src;
-    img.addEventListener('load', function() {
-      if (callback) callback(img);
-    });
-    img.addEventListener('error', function() {
-      if (callback) callback(img);
-    });
+    img.onload = function() { if (callback) callback(img); };
+    img.onerror = function() { if (callback) callback(img); };
   }
 }
 
@@ -462,7 +454,7 @@ function createElement(index) {
     var video = document.createElement('video');
     video.src = src;
     video.playsInline = true;
-    video.muted = false;
+    video.muted = true;
     return video;
   } else {
     var img = document.createElement('img');
@@ -482,9 +474,13 @@ function displayElement(el, slide, old) {
   currentDisplayed = el;
 
   if (el.tagName === 'VIDEO') {
-    // Video-to-video: destroy old instantly to free hardware decoder
-    if (old && old.tagName === 'VIDEO') {
-      releaseElement(old);
+    // Kill old decoder conflict: video-to-video = instant destroy, image = fade
+    if (old) {
+      if (old.tagName === 'VIDEO') {
+        releaseElement(old);
+      } else {
+        fadeOutAndRelease(old);
+      }
       old = null;
     }
 
@@ -493,26 +489,24 @@ function displayElement(el, slide, old) {
     slideContainerEl.appendChild(el);
 
     var revealVideo = function() {
-      // Image-to-video: instant hide old image when video pixels exist
-      if (old) {
-        old.style.display = 'none';
-        releaseElement(old);
-      }
-      el.style.opacity = '1';
-      el.className = 'slide-fade-in';
-      // Soft audio entry after first frame is rendered
+      // 150ms settling delay prevents first-frame flicker
       setTimeout(function() {
-        el.muted = false;
-        el.volume = 1;
+        if (old) {
+          old.style.display = 'none';
+          releaseElement(old);
+        }
+        el.className = 'slide-fade-in';
+        el.style.opacity = '1';
+        // Soft audio start prevents stutter
+        setTimeout(function() {
+          el.muted = false;
+          el.volume = 1;
+        }, 150);
       }, 150);
     };
 
     el.addEventListener('playing', revealVideo, { once: true });
-
-    el.play().catch(function() {
-      showNextSlide();
-    });
-
+    el.play().catch(function() { showNextSlide(); });
     el.addEventListener('ended', function() { showNextSlide(); }, { once: true });
   } else {
     el.className = 'slide-fade-in';
