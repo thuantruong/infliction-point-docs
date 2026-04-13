@@ -56,17 +56,7 @@ playerManager.addEventListener(cast.framework.events.EventType.MEDIA_STATUS, fun
       }
       imageTimer = setTimeout(function() {
         if (!slideshowActive) return;
-        var queueManager = playerManager.getQueueManager();
-        var items = queueManager.getItems();
-        var currentItem = queueManager.getCurrentItem();
-        if (items && items.length > 1 && currentItem) {
-          var currentIndex = -1;
-          for (var j = 0; j < items.length; j++) {
-            if (items[j].itemId === currentItem.itemId) { currentIndex = j; break; }
-          }
-          var nextIndex = (currentIndex + 1) % items.length;
-          queueManager.jump(items[nextIndex].itemId);
-        }
+        playerManager.getQueueManager().next();
       }, duration * 1000);
     }
   }
@@ -84,15 +74,11 @@ function isVideoSrc(src) {
 }
 
 function getContentType(src) {
+  if (isVideoSrc(src)) return 'video/mp4';
   var ext = src.split('.').pop().toLowerCase();
   switch (ext) {
-    case 'mp4': return 'video/mp4';
-    case 'webm': return 'video/webm';
-    case 'ogg': return 'video/ogg';
     case 'webp': return 'image/webp';
     case 'png': return 'image/png';
-    case 'gif': return 'image/gif';
-    case 'svg': return 'image/svg+xml';
     default: return 'image/jpeg';
   }
 }
@@ -124,25 +110,23 @@ function startSlideshow(data, baseUrl) {
     var mediaInfo = new cast.framework.messages.MediaInformation();
     mediaInfo.contentUrl = baseUrl + slide.src;
     mediaInfo.contentType = getContentType(slide.src);
+    mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
 
-    if (!isVideoSrc(slide.src)) {
-      mediaInfo.streamType = cast.framework.messages.StreamType.BUFFERED;
-      mediaInfo.duration = slide.duration || 10;
-    }
+    var metadata = new cast.framework.messages.GenericMediaMetadata();
+    metadata.title = 'Infliction Point';
+    mediaInfo.metadata = metadata;
 
     var queueItem = new cast.framework.messages.QueueItem();
     queueItem.media = mediaInfo;
     queueItem.autoplay = true;
-    queueItem.preloadTime = 2;
+    queueItem.preloadTime = 3;
     return queueItem;
   });
 
   var loadRequestData = new cast.framework.messages.LoadRequestData();
-  loadRequestData.autoplay = true;
   var queueData = new cast.framework.messages.QueueData();
   queueData.items = queueItems;
   queueData.repeatMode = cast.framework.messages.RepeatMode.ALL;
-  queueData.startIndex = 0;
   loadRequestData.queueData = queueData;
 
   playerManager.load(loadRequestData).then(function() {
