@@ -227,23 +227,46 @@ function showScoreboard() {
 
 // --- Rendering ---
 
-function renderMatchState(state) {
+function renderMatchState(state, sidesSwapped) {
   showScoreboard();
 
   var config = state.config;
   var format = config.matchFormat;
 
-  renderTeamPanels(state, format);
-  renderCenterOverlay(state, config, format);
+  // Swap panel backgrounds and labels
+  var team1Panel = document.getElementById('team1');
+  var team2Panel = document.getElementById('team2');
+  if (sidesSwapped) {
+    team1Panel.className = 'team-panel team2-bg';
+    team2Panel.className = 'team-panel team1-bg';
+    label1El.className = 'team-label-pill team2-pill';
+    label2El.className = 'team-label-pill team1-pill';
+    label1El.textContent = 'TEAM 2';
+    label2El.textContent = 'TEAM 1';
+  } else {
+    team1Panel.className = 'team-panel team1-bg';
+    team2Panel.className = 'team-panel team2-bg';
+    label1El.className = 'team-label-pill team1-pill';
+    label2El.className = 'team-label-pill team2-pill';
+    label1El.textContent = 'TEAM 1';
+    label2El.textContent = 'TEAM 2';
+  }
+
+  renderTeamPanels(state, format, sidesSwapped);
+  renderCenterOverlay(state, config, format, sidesSwapped);
 }
 
-function renderTeamPanels(state, format) {
+function renderTeamPanels(state, format, sidesSwapped) {
   var isOver = state.isMatchOver;
   var winner = state.matchWinner;
   var isDraw = isOver && !winner;
 
-  serve1El.classList.toggle('hidden', state.servingTeam !== 'TEAM_1' || isOver);
-  serve2El.classList.toggle('hidden', state.servingTeam !== 'TEAM_2' || isOver);
+  // Map logical teams to left/right panels
+  var leftTeam = sidesSwapped ? 'TEAM_2' : 'TEAM_1';
+  var rightTeam = sidesSwapped ? 'TEAM_1' : 'TEAM_2';
+
+  serve1El.classList.toggle('hidden', state.servingTeam !== leftTeam || isOver);
+  serve2El.classList.toggle('hidden', state.servingTeam !== rightTeam || isOver);
 
   var text1, text2;
 
@@ -251,7 +274,8 @@ function renderTeamPanels(state, format) {
     text1 = '\u2014';
     text2 = '\u2014';
   } else if (isOver && winner) {
-    if (winner === 'TEAM_1') {
+    var winnerOnLeft = winner === leftTeam;
+    if (winnerOnLeft) {
       scoreContainer1El.classList.add('hidden');
       medal1El.classList.remove('hidden');
       label1El.classList.remove('hidden');
@@ -268,23 +292,27 @@ function renderTeamPanels(state, format) {
     }
     return;
   } else if (format === 'FIXED_POINT') {
-    text1 = state.sets[state.currentSetIndex].gamesTeam1;
-    text2 = state.sets[state.currentSetIndex].gamesTeam2;
+    var fp1 = state.sets[state.currentSetIndex].gamesTeam1;
+    var fp2 = state.sets[state.currentSetIndex].gamesTeam2;
+    text1 = sidesSwapped ? fp2 : fp1;
+    text2 = sidesSwapped ? fp1 : fp2;
   } else if (state.isTiebreak) {
-    text1 = state.tiebreakPointsTeam1;
-    text2 = state.tiebreakPointsTeam2;
-  } else if (state.advantageTeam === 'TEAM_1') {
+    text1 = sidesSwapped ? state.tiebreakPointsTeam2 : state.tiebreakPointsTeam1;
+    text2 = sidesSwapped ? state.tiebreakPointsTeam1 : state.tiebreakPointsTeam2;
+  } else if (state.advantageTeam === leftTeam) {
     text1 = 'AD';
     text2 = '\u2014';
-  } else if (state.advantageTeam === 'TEAM_2') {
+  } else if (state.advantageTeam === rightTeam) {
     text1 = '\u2014';
     text2 = 'AD';
   } else if (state.isDeuce) {
     text1 = '40';
     text2 = '40';
   } else {
-    text1 = pointDisplayValue(state.pointsTeam1);
-    text2 = pointDisplayValue(state.pointsTeam2);
+    var pt1 = pointDisplayValue(state.pointsTeam1);
+    var pt2 = pointDisplayValue(state.pointsTeam2);
+    text1 = sidesSwapped ? pt2 : pt1;
+    text2 = sidesSwapped ? pt1 : pt2;
   }
 
   scoreContainer1El.classList.remove('hidden');
@@ -298,7 +326,7 @@ function renderTeamPanels(state, format) {
   points2El.textContent = text2;
 }
 
-function renderCenterOverlay(state, config, format) {
+function renderCenterOverlay(state, config, format, sidesSwapped) {
   dotsRowEl.innerHTML = '';
   scoreRow1El.innerHTML = '';
   scoreRow1El.className = 'score-row';
@@ -311,25 +339,31 @@ function renderCenterOverlay(state, config, format) {
   var winner = state.matchWinner;
   var isDraw = isOver && !winner;
 
+  // Helper: swap left/right scores when sides swapped
+  function lr(t1val, t2val) {
+    return sidesSwapped ? [t2val, t1val] : [t1val, t2val];
+  }
+
   if (format === 'CLASSIC') {
     if (config.bestOfSets === 1) {
       renderGameDots(state, config.gamesPerSet * 2 - 1);
       formatLabelEl.textContent = 'Games to ' + config.gamesPerSet;
-      renderScoreRow(scoreRow1El, 'large',
-        state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+      var g = lr(state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+      renderScoreRow(scoreRow1El, 'large', g[0], g[1], sidesSwapped);
     } else {
       renderSetDots(state, config.bestOfSets);
       formatLabelEl.textContent = 'Best of ' + config.bestOfSets + ' Sets';
       var setsWon1 = state.sets.filter(function(s) { return s.winner === 'TEAM_1'; }).length;
       var setsWon2 = state.sets.filter(function(s) { return s.winner === 'TEAM_2'; }).length;
-      renderScoreRow(scoreRow1El, 'medium', setsWon1, setsWon2);
+      var sw = lr(setsWon1, setsWon2);
+      renderScoreRow(scoreRow1El, 'medium', sw[0], sw[1], sidesSwapped);
 
       if (!isOver) {
         scoreRowLabelEl.textContent = 'Games to ' + config.gamesPerSet;
         scoreRowLabelEl.classList.remove('hidden');
         var currentSet = state.sets[state.currentSetIndex];
-        renderScoreRow(scoreRow2El, 'large',
-          currentSet.gamesTeam1, currentSet.gamesTeam2);
+        var cg = lr(currentSet.gamesTeam1, currentSet.gamesTeam2);
+        renderScoreRow(scoreRow2El, 'large', cg[0], cg[1], sidesSwapped);
       }
     }
     if (state.isTiebreak) {
@@ -341,7 +375,8 @@ function renderCenterOverlay(state, config, format) {
     formatLabelEl.textContent = 'Total ' + config.totalGames + ' Games';
     var gamesWon1 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam1; }, 0);
     var gamesWon2 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam2; }, 0);
-    renderScoreRow(scoreRow1El, 'large', gamesWon1, gamesWon2);
+    var gw = lr(gamesWon1, gamesWon2);
+    renderScoreRow(scoreRow1El, 'large', gw[0], gw[1], sidesSwapped);
     if (isDraw) {
       badgeEl.textContent = 'DRAW';
       badgeEl.classList.remove('hidden');
@@ -358,8 +393,8 @@ function renderCenterOverlay(state, config, format) {
       badgeEl.classList.remove('hidden');
     }
     if (isOver) {
-      renderScoreRow(scoreRow1El, 'large',
-        state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+      var fp = lr(state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
+      renderScoreRow(scoreRow1El, 'large', fp[0], fp[1], sidesSwapped);
     }
   }
 
@@ -369,12 +404,12 @@ function renderCenterOverlay(state, config, format) {
   }
 }
 
-function renderScoreRow(container, size, score1, score2) {
+function renderScoreRow(container, size, score1, score2, swapped) {
   container.className = 'score-row ' + size;
   container.innerHTML = '';
 
   var s1 = document.createElement('span');
-  s1.className = 'score-team1';
+  s1.className = swapped ? 'score-team2' : 'score-team1';
   s1.textContent = score1;
 
   var sep = document.createElement('span');
@@ -382,7 +417,7 @@ function renderScoreRow(container, size, score1, score2) {
   sep.textContent = '\u00B7';
 
   var s2 = document.createElement('span');
-  s2.className = 'score-team2';
+  s2.className = swapped ? 'score-team1' : 'score-team2';
   s2.textContent = score2;
 
   container.appendChild(s1);
@@ -439,7 +474,7 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
 
   switch (message.type) {
     case 'match_state':
-      if (message.state) renderMatchState(message.state);
+      if (message.state) renderMatchState(message.state, !!message.sidesSwapped);
       break;
     case 'idle':
       showIdle(message.playlistUrl);
