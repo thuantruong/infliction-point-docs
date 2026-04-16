@@ -301,9 +301,9 @@ function renderTeamPanels(state, format, sidesSwapped) {
     text2 = sidesSwapped ? state.tiebreakPointsTeam1 : state.tiebreakPointsTeam2;
   } else if (state.advantageTeam === leftTeam) {
     text1 = 'AD';
-    text2 = '\u2014';
+    text2 = '';
   } else if (state.advantageTeam === rightTeam) {
-    text1 = '\u2014';
+    text1 = '';
     text2 = 'AD';
   } else if (state.isDeuce) {
     text1 = '40';
