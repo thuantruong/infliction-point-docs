@@ -1,0 +1,14 @@
+{
+  "64x32": {
+    "version": "1.0.0",
+    "url": "https://infliction-point.2an.dev/firmware/ip-64x32-1.0.0.bin",
+    "size": 1167056,
+    "md5": "6b302b69c7ec616b0b7217ee6ea01945"
+  },
+  "64x8": {
+    "version": "1.0.0",
+    "url": "https://infliction-point.2an.dev/firmware/ip-64x8-1.0.0.bin",
+    "size": 1165392,
+    "md5": "2785a21f8728861b4d976d0edde526d2"
+  }
+}
