@@ -235,11 +235,8 @@ function formatDuration(ms) {
   var totalMin = Math.floor(ms / 60000);
   var h = Math.floor(totalMin / 60);
   var m = totalMin % 60;
-  if (h > 0) {
-    var mm = m < 10 ? '0' + m : '' + m;
-    return h + 'h ' + mm + ' min';
-  }
-  return totalMin + ' min';
+  var mm = m < 10 ? '0' + m : '' + m;
+  return h + ':' + mm;
 }
 
 function teamDisplayName(players, fallback) {

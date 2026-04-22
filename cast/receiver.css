@@ -261,4 +261,6 @@ cast-media-player {
   --splash-image-display: none;
   --spinner-display: none;
   --buffering-display: none;
+  --splash-text-display: none;
+  --metadata-display: none;
 }
