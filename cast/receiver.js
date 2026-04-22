@@ -30,6 +30,7 @@ const scoreRow2El = document.getElementById('score-row-2');
 const dotsRowEl = document.getElementById('dots-row');
 const badgeEl = document.getElementById('badge');
 const durationEl = document.getElementById('duration');
+const durationTextEl = document.getElementById('duration-text');
 
 var durationInterval = null;
 
@@ -280,11 +281,11 @@ function renderMatchState(state, sidesSwapped) {
   if (startMs > 0) {
     durationEl.classList.remove('hidden');
     if (endMs > 0) {
-      durationEl.textContent = formatDuration(endMs - startMs);
+      durationTextEl.textContent = formatDuration(endMs - startMs);
     } else {
-      durationEl.textContent = formatDuration(Date.now() - startMs);
+      durationTextEl.textContent = formatDuration(Date.now() - startMs);
       durationInterval = setInterval(function() {
-        durationEl.textContent = formatDuration(Date.now() - startMs);
+        durationTextEl.textContent = formatDuration(Date.now() - startMs);
       }, 60000);
     }
   } else {
@@ -386,12 +387,12 @@ function renderCenterOverlay(state, config, format, sidesSwapped) {
   if (format === 'CLASSIC') {
     if (config.bestOfSets === 1) {
       renderGameDots(state, config.gamesPerSet * 2 - 1);
-      formatLabelEl.textContent = 'Games to ' + config.gamesPerSet;
+      formatLabelEl.textContent = 'GAMES (' + config.gamesPerSet + ')';
       var g = lr(state.sets[0].gamesTeam1, state.sets[0].gamesTeam2);
       renderScoreRow(scoreRow1El, 'large', g[0], g[1], sidesSwapped);
     } else {
       renderSetDots(state, config.bestOfSets);
-      formatLabelEl.textContent = 'Best of ' + config.bestOfSets + ' Sets';
+      formatLabelEl.textContent = 'CLASSIC (' + config.bestOfSets + ' SETS)';
       var setsWon1 = state.sets.filter(function(s) { return s.winner === 'TEAM_1'; }).length;
       var setsWon2 = state.sets.filter(function(s) { return s.winner === 'TEAM_2'; }).length;
       var sw = lr(setsWon1, setsWon2);
@@ -411,7 +412,7 @@ function renderCenterOverlay(state, config, format, sidesSwapped) {
     }
   } else if (format === 'TOTAL_GAMES') {
     renderGameDots(state, config.totalGames);
-    formatLabelEl.textContent = 'Total ' + config.totalGames + ' Games';
+    formatLabelEl.textContent = 'TOTAL GAMES';
     var gamesWon1 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam1; }, 0);
     var gamesWon2 = state.sets.reduce(function(sum, s) { return sum + s.gamesTeam2; }, 0);
     var gw = lr(gamesWon1, gamesWon2);
@@ -421,7 +422,7 @@ function renderCenterOverlay(state, config, format, sidesSwapped) {
       badgeEl.classList.remove('hidden');
     }
   } else if (format === 'FIXED_POINT') {
-    formatLabelEl.textContent = config.totalPoints + ' Points';
+    formatLabelEl.textContent = config.totalPoints + ' POINTS';
     var played = state.sets[0].gamesTeam1 + state.sets[0].gamesTeam2;
     if (played > config.totalPoints) {
       badgeEl.textContent = 'TIEBREAK';
