@@ -199,6 +199,244 @@ html, body {
   margin-top: 0.2vh;
 }
 
+/* --- Broadcast Theme --- */
+
+#scoreboard-broadcast {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-color: #0a0a0a;
+}
+
+.bc-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.bc-layout {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 8vw;
+  gap: 2.5vh;
+}
+
+.bc-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bc-header {
+  display: flex;
+  align-items: center;
+}
+
+.bc-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6vw;
+  font-weight: 700;
+  color: #D5FB28;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+
+.bc-duration {
+  display: flex;
+  align-items: center;
+  gap: 0.5vw;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.2vw;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.08em;
+}
+
+.bc-duration-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.bc-table-wrapper {
+  position: relative;
+}
+
+.bc-table {
+  display: flex;
+  flex-direction: column;
+  background: rgba(15, 15, 15, 0.85);
+  border-radius: 0.8vw;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+}
+
+.bc-col-header-row {
+  display: flex;
+  align-items: center;
+  padding: 1.2vh 2vw;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.bc-name-header {
+  flex: 1;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95vw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.bc-set-headers {
+  display: flex;
+}
+
+.bc-set-header-cell {
+  width: 7vw;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95vw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.bc-point-header {
+  width: 18vw;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95vw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.bc-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.bc-row {
+  display: flex;
+  align-items: center;
+  padding: 2.5vh 2vw;
+  min-height: 15vh;
+}
+
+.bc-team-strip {
+  width: 5px;
+  align-self: stretch;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-right: 1.8vw;
+}
+
+.bc-team-strip.team1 { background: #1565C0; }
+.bc-team-strip.team2 { background: #E65100; }
+
+.bc-names-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2vh;
+}
+
+.bc-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2vw;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+
+.bc-serve-ball {
+  width: 2.2vw;
+  height: 2.2vw;
+  flex-shrink: 0;
+  margin-right: 1.5vw;
+}
+
+.bc-serve-ball img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bc-sets-cell {
+  display: flex;
+}
+
+.bc-set-score {
+  width: 7vw;
+  text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.9vw;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.bc-set-score.won { color: #D5FB28; }
+
+.bc-point-cell {
+  width: 18vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 11vh;
+}
+
+.bc-points {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 7vw;
+  font-weight: 700;
+  line-height: 1;
+  color: #FFFFFF;
+}
+
+.bc-points.advantage { color: #D5FB28; }
+
+.bc-trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bc-trophy .trophy-img {
+  width: 5vw;
+  height: 5vw;
+}
+
+.bc-badge {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  white-space: nowrap;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1vw;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #EF5350;
+  text-transform: uppercase;
+  background: rgba(15, 15, 15, 0.95);
+  padding: 0.35em 1.2em;
+  border-radius: 9999px;
+  border: 1px solid rgba(239, 83, 80, 0.35);
+}
+
 /* --- Idle --- */
 
 #idle {
