@@ -128,7 +128,7 @@ function showNextSlide() {
 
   currentSlideIndex = (currentSlideIndex + 1) % slideshowData.slides.length;
   var slide = slideshowData.slides[currentSlideIndex];
-  var src = slideshowBaseUrl + slide.src;
+  var src = /^https?:\/\//i.test(slide.src) ? slide.src : slideshowBaseUrl + slide.src;
 
   if (isVideoSrc(slide.src)) {
     showVideo(src);
@@ -265,9 +265,12 @@ function showScoreboard() {
   scoreboardEl.classList.toggle('hidden', isBroadcast);
   scoreboardBroadcastEl.classList.toggle('hidden', !isBroadcast);
   if (isBroadcast) {
-    var bgImg = (themeConfig.backgroundImage && themeBaseUrl)
-      ? "url('" + themeBaseUrl + themeConfig.backgroundImage + "')"
-      : 'none';
+    var bgImg = 'none';
+    if (themeConfig.backgroundImage) {
+      var isAbsolute = /^https?:\/\//i.test(themeConfig.backgroundImage);
+      var bgSrc = isAbsolute ? themeConfig.backgroundImage : themeBaseUrl + themeConfig.backgroundImage;
+      bgImg = "url('" + bgSrc + "')";
+    }
     scoreboardBroadcastEl.style.backgroundImage = bgImg;
   }
 }
