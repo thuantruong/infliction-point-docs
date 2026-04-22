@@ -29,6 +29,9 @@ const scoreRowLabelEl = document.getElementById('score-row-label');
 const scoreRow2El = document.getElementById('score-row-2');
 const dotsRowEl = document.getElementById('dots-row');
 const badgeEl = document.getElementById('badge');
+const durationEl = document.getElementById('duration');
+
+var durationInterval = null;
 
 // --- Cast Receiver Setup ---
 
@@ -193,6 +196,7 @@ playerManager.addEventListener(cast.framework.events.EventType.MEDIA_FINISHED, f
 
 function showIdle(playlistUrl) {
   stopSlideshow();
+  if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
   scoreboardEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
@@ -227,6 +231,24 @@ function showScoreboard() {
 
 // --- Rendering ---
 
+function formatDuration(ms) {
+  var totalMin = Math.floor(ms / 60000);
+  var h = Math.floor(totalMin / 60);
+  var m = totalMin % 60;
+  if (h > 0) {
+    var mm = m < 10 ? '0' + m : '' + m;
+    return h + 'h ' + mm + ' min';
+  }
+  return totalMin + ' min';
+}
+
+function teamDisplayName(players, fallback) {
+  if (players && players.length > 0) {
+    return players.map(function(p) { return p.name; }).join(' / ');
+  }
+  return fallback;
+}
+
 function renderMatchState(state, sidesSwapped) {
   showScoreboard();
 
@@ -236,20 +258,40 @@ function renderMatchState(state, sidesSwapped) {
   // Swap panel backgrounds and labels
   var team1Panel = document.getElementById('team1');
   var team2Panel = document.getElementById('team2');
+  var t1Name = teamDisplayName(config.team1Players, 'TEAM 1');
+  var t2Name = teamDisplayName(config.team2Players, 'TEAM 2');
   if (sidesSwapped) {
     team1Panel.className = 'team-panel team2-bg';
     team2Panel.className = 'team-panel team1-bg';
     label1El.className = 'team-label-pill team2-pill';
     label2El.className = 'team-label-pill team1-pill';
-    label1El.textContent = 'TEAM 2';
-    label2El.textContent = 'TEAM 1';
+    label1El.textContent = t2Name;
+    label2El.textContent = t1Name;
   } else {
     team1Panel.className = 'team-panel team1-bg';
     team2Panel.className = 'team-panel team2-bg';
     label1El.className = 'team-label-pill team1-pill';
     label2El.className = 'team-label-pill team2-pill';
-    label1El.textContent = 'TEAM 1';
-    label2El.textContent = 'TEAM 2';
+    label1El.textContent = t1Name;
+    label2El.textContent = t2Name;
+  }
+
+  // Duration
+  if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
+  var startMs = state.matchStartTime || 0;
+  var endMs = state.matchEndTime || 0;
+  if (startMs > 0) {
+    durationEl.classList.remove('hidden');
+    if (endMs > 0) {
+      durationEl.textContent = formatDuration(endMs - startMs);
+    } else {
+      durationEl.textContent = formatDuration(Date.now() - startMs);
+      durationInterval = setInterval(function() {
+        durationEl.textContent = formatDuration(Date.now() - startMs);
+      }, 60000);
+    }
+  } else {
+    durationEl.classList.add('hidden');
   }
 
   renderTeamPanels(state, format, sidesSwapped);

@@ -58,7 +58,7 @@ html, body {
 
 .team-label-pill {
   position: absolute;
-  bottom: 8%;
+  bottom: 25%;
   font-family: 'Manrope', sans-serif;
   font-size: 1.4vw;
   font-weight: 600;
@@ -171,6 +171,16 @@ html, body {
 .dot.team1-won { background: #1565C0; border-color: #1565C0; }
 .dot.team2-won { background: #E65100; border-color: #E65100; }
 .dot.current  { background: #D5FB28; border-color: #D5FB28; }
+
+.duration-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1vw;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-top: 0.2vh;
+}
 
 .badge {
   font-family: 'Manrope', sans-serif;
