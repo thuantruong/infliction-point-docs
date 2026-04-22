@@ -256,4 +256,9 @@ cast-media-player {
   --progress-color: transparent;
   --splash-image: none;
   --controls-display: none;
+  --playback-controls-display: none;
+  --progressbar-display: none;
+  --splash-image-display: none;
+  --spinner-display: none;
+  --buffering-display: none;
 }
