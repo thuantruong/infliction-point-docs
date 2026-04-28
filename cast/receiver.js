@@ -615,7 +615,8 @@ function renderBroadcastNames(el, displayName) {
   });
 }
 
-function renderBroadcastTheme(state, sidesSwapped) {
+function renderBroadcastTheme(state) {
+  var sidesSwapped = false;
   var config = state.config;
   var format = config.matchFormat;
   var isOver = state.isMatchOver;

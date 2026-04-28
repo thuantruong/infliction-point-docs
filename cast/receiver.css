@@ -395,7 +395,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 11vh;
+  min-height: 7vw;
 }
 
 .bc-points {
@@ -404,6 +404,7 @@ html, body {
   font-weight: 700;
   line-height: 1;
   color: #FFFFFF;
+  min-height: 1em;
 }
 
 .bc-points.advantage { color: #D5FB28; }
