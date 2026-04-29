@@ -40,6 +40,8 @@ const bcPoints1El = document.getElementById('bc-points1');
 const bcPoints2El = document.getElementById('bc-points2');
 const bcTrophy1El = document.getElementById('bc-trophy1');
 const bcTrophy2El = document.getElementById('bc-trophy2');
+const bcStar1El = document.getElementById('bc-star1');
+const bcStar2El = document.getElementById('bc-star2');
 const bcStrip1El = document.getElementById('bc-strip1');
 const bcStrip2El = document.getElementById('bc-strip2');
 const bcServe1El = document.getElementById('bc-serve1');
@@ -225,6 +227,7 @@ function showIdle(playlistUrl) {
   stopSlideshow();
   if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
   scoreboardEl.classList.add('hidden');
+  scoreboardBroadcastEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
   if (!playlistUrl) {
@@ -397,6 +400,9 @@ function renderTeamPanels(state, format, sidesSwapped) {
   } else if (state.advantageTeam === rightTeam) {
     text1 = '';
     text2 = 'AD';
+  } else if (state.isStarPoint) {
+    text1 = '★';
+    text2 = '★';
   } else if (state.isDeuce) {
     text1 = '40';
     text2 = '40';
@@ -490,7 +496,10 @@ function renderCenterOverlay(state, config, format, sidesSwapped) {
     }
   }
 
-  if (state.isDeuce && !state.advantageTeam && format !== 'FIXED_POINT') {
+  if (state.isStarPoint && format !== 'FIXED_POINT') {
+    badgeEl.textContent = 'STAR POINT';
+    badgeEl.classList.remove('hidden');
+  } else if (state.isDeuce && !state.advantageTeam && format !== 'FIXED_POINT') {
     badgeEl.textContent = 'DEUCE';
     badgeEl.classList.remove('hidden');
   }
@@ -599,8 +608,11 @@ function renderBroadcastSetCols(state, config, format, sidesSwapped) {
       games1 = state.sets[0].gamesTeam1;
       games2 = state.sets[0].gamesTeam2;
     }
-    addScore(bcSets1El, sidesSwapped ? games2 : games1, false, false);
-    addScore(bcSets2El, sidesSwapped ? games1 : games2, false, false);
+    var isOver = state.isMatchOver;
+    var gWon1 = isOver && state.matchWinner === (sidesSwapped ? 'TEAM_2' : 'TEAM_1');
+    var gWon2 = isOver && state.matchWinner === (sidesSwapped ? 'TEAM_1' : 'TEAM_2');
+    addScore(bcSets1El, sidesSwapped ? games2 : games1, gWon1, gWon2);
+    addScore(bcSets2El, sidesSwapped ? games1 : games2, gWon2, gWon1);
   }
 }
 
@@ -673,6 +685,8 @@ function renderBroadcastTheme(state) {
   bcPointCell2El.classList.remove('serving');
   bcTrophy1El.classList.add('hidden');
   bcTrophy2El.classList.add('hidden');
+  bcStar1El.classList.add('hidden');
+  bcStar2El.classList.add('hidden');
   bcPoints1El.classList.remove('hidden', 'advantage');
   bcPoints2El.classList.remove('hidden', 'advantage');
   bcServe1El.classList.add('hidden');
@@ -710,6 +724,13 @@ function renderBroadcastTheme(state) {
     } else if (state.advantageTeam === rightTeam) {
       text1 = '';
       text2 = 'AD'; bcPoints2El.classList.add('advantage');
+    } else if (state.isStarPoint) {
+      bcPoints1El.classList.add('hidden');
+      bcPoints2El.classList.add('hidden');
+      bcStar1El.classList.remove('hidden');
+      bcStar2El.classList.remove('hidden');
+      bcBadgeEl.textContent = 'STAR POINT';
+      bcBadgeEl.classList.remove('hidden');
     } else if (state.isDeuce) {
       text1 = '40';
       text2 = '40';
@@ -721,8 +742,10 @@ function renderBroadcastTheme(state) {
       text1 = sidesSwapped ? pt2 : pt1;
       text2 = sidesSwapped ? pt1 : pt2;
     }
-    bcPoints1El.textContent = text1;
-    bcPoints2El.textContent = text2;
+    if (!state.isStarPoint) {
+      bcPoints1El.textContent = text1;
+      bcPoints2El.textContent = text2;
+    }
 
     // Serving highlight + tennis ball
     if (state.servingTeam === leftTeam) {

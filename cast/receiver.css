@@ -409,6 +409,19 @@ html, body {
 
 .bc-points.advantage { color: #D5FB28; }
 
+.bc-star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5vw;
+  height: 5vw;
+  color: #D5FB28;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 5vw;
+  font-weight: 700;
+  line-height: 0;
+}
+
 .bc-trophy {
   display: flex;
   align-items: center;
