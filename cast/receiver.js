@@ -22,6 +22,18 @@ const serve2El = document.getElementById('serve2');
 const medal1El = document.getElementById('medal1');
 const medal2El = document.getElementById('medal2');
 
+// VS preview elements
+const vsScreenEl = document.getElementById('vs-screen');
+const vsDefaultLayoutEl = document.getElementById('vs-default-layout');
+const vsBroadcastLayoutEl = document.getElementById('vs-broadcast-layout');
+const vsNames1DefaultEl = document.getElementById('vs-names1-default');
+const vsNames2DefaultEl = document.getElementById('vs-names2-default');
+const vsNames1BroadcastEl = document.getElementById('vs-names1-broadcast');
+const vsNames2BroadcastEl = document.getElementById('vs-names2-broadcast');
+const vsBcHeaderEl = document.getElementById('vs-bc-header');
+const vsBcTitleEl = document.getElementById('vs-bc-title');
+const vsBcSubtitleEl = document.getElementById('vs-bc-subtitle');
+
 // Broadcast theme elements
 const scoreboardBroadcastEl = document.getElementById('scoreboard-broadcast');
 const bcHeaderEl = document.getElementById('bc-header');
@@ -61,6 +73,28 @@ const durationTextEl = document.getElementById('duration-text');
 var durationInterval = null;
 var themeConfig = null;
 var themeBaseUrl = null;
+
+function setBroadcastBg(containerEl, bgImg) {
+  var layer = containerEl.querySelector('.bc-bg-image');
+  if (!layer) return;
+  if (!bgImg || bgImg === 'none') {
+    layer.classList.remove('loaded');
+    layer.style.backgroundImage = 'none';
+    return;
+  }
+  var src = bgImg.slice(4, -1).replace(/['"]/g, '');
+  layer.classList.remove('loaded');
+  var img = new Image();
+  img.onload = function() {
+    layer.style.backgroundImage = bgImg;
+    requestAnimationFrame(function() { layer.classList.add('loaded'); });
+  };
+  img.onerror = function() {
+    layer.style.backgroundImage = bgImg;
+    requestAnimationFrame(function() { layer.classList.add('loaded'); });
+  };
+  img.src = src;
+}
 
 // --- Cast Receiver Setup ---
 
@@ -228,6 +262,7 @@ function showIdle(playlistUrl) {
   if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
   scoreboardEl.classList.add('hidden');
   scoreboardBroadcastEl.classList.add('hidden');
+  vsScreenEl.classList.add('hidden');
   idleEl.classList.remove('hidden');
 
   if (!playlistUrl) {
@@ -264,6 +299,7 @@ function showIdle(playlistUrl) {
 function showScoreboard() {
   stopSlideshow();
   idleEl.classList.add('hidden');
+  vsScreenEl.classList.add('hidden');
   var isBroadcast = themeConfig && themeConfig.theme === 'broadcast';
   scoreboardEl.classList.toggle('hidden', isBroadcast);
   scoreboardBroadcastEl.classList.toggle('hidden', !isBroadcast);
@@ -274,7 +310,7 @@ function showScoreboard() {
       var bgSrc = isAbsolute ? themeConfig.backgroundImage : themeBaseUrl + themeConfig.backgroundImage;
       bgImg = "url('" + bgSrc + "')";
     }
-    scoreboardBroadcastEl.style.backgroundImage = bgImg;
+    setBroadcastBg(scoreboardBroadcastEl, bgImg);
   }
 }
 
@@ -293,6 +329,50 @@ function teamDisplayName(players, fallback) {
     return players.map(function(p) { return p.name; }).join(' / ');
   }
   return fallback;
+}
+
+function showVsPreview(team1Names, team2Names) {
+  stopSlideshow();
+  if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
+  idleEl.classList.add('hidden');
+  scoreboardEl.classList.add('hidden');
+  scoreboardBroadcastEl.classList.add('hidden');
+  vsScreenEl.classList.remove('hidden');
+
+  var isBroadcast = themeConfig && themeConfig.theme === 'broadcast';
+  vsDefaultLayoutEl.classList.toggle('hidden', isBroadcast);
+  vsBroadcastLayoutEl.classList.toggle('hidden', !isBroadcast);
+
+  function renderVsNames(el, names, cls) {
+    el.innerHTML = '';
+    names.split(' / ').forEach(function(name) {
+      var d = document.createElement('div');
+      d.className = cls;
+      d.textContent = name;
+      el.appendChild(d);
+    });
+  }
+  renderVsNames(vsNames1DefaultEl, team1Names, 'vs-name');
+  renderVsNames(vsNames2DefaultEl, team2Names, 'vs-name');
+  renderVsNames(vsNames1BroadcastEl, team1Names, 'bc-name');
+  renderVsNames(vsNames2BroadcastEl, team2Names, 'bc-name');
+
+  if (isBroadcast) {
+    if (themeConfig.title) {
+      vsBcTitleEl.textContent = themeConfig.title;
+      vsBcSubtitleEl.textContent = themeConfig.subtitle || '';
+      vsBcHeaderEl.classList.remove('hidden');
+    } else {
+      vsBcHeaderEl.classList.add('hidden');
+    }
+    var bgImg = 'none';
+    if (themeConfig.backgroundImage) {
+      var isAbsolute = /^https?:\/\//i.test(themeConfig.backgroundImage);
+      var bgSrc = isAbsolute ? themeConfig.backgroundImage : themeBaseUrl + themeConfig.backgroundImage;
+      bgImg = "url('" + bgSrc + "')";
+    }
+    setBroadcastBg(vsBroadcastLayoutEl, bgImg);
+  }
 }
 
 function renderMatchState(state, sidesSwapped) {
@@ -784,6 +864,9 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
   switch (message.type) {
     case 'match_state':
       if (message.state) renderMatchState(message.state, !!message.sidesSwapped);
+      break;
+    case 'vs_preview':
+      if (message.team1 && message.team2) showVsPreview(message.team1, message.team2);
       break;
     case 'idle':
       showIdle(message.playlistUrl);

@@ -45,6 +45,7 @@
   </div>
 
   <div id="scoreboard-broadcast" class="hidden">
+    <div class="bc-bg-image"></div>
     <div class="bc-bg-overlay"></div>
     <div class="bc-layout">
       <div class="bc-top-row">
@@ -92,6 +93,41 @@
         <div class="bc-divider"></div>
       </div>
       <div id="bc-badge" class="bc-badge hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="vs-screen" class="hidden">
+    <div id="vs-default-layout" class="hidden">
+      <div class="vs-panel vs-panel-team1">
+        <div id="vs-names1-default" class="vs-names"></div>
+      </div>
+      <div class="vs-center-default">
+        <span class="vs-label-default">VS</span>
+      </div>
+      <div class="vs-panel vs-panel-team2">
+        <div id="vs-names2-default" class="vs-names"></div>
+      </div>
+    </div>
+    <div id="vs-broadcast-layout" class="hidden">
+      <div class="bc-bg-image"></div>
+      <div class="bc-bg-overlay"></div>
+      <div class="vs-bc-outer">
+        <div id="vs-bc-header" class="bc-header hidden">
+          <span id="vs-bc-title" class="bc-title"></span>
+          <span id="vs-bc-subtitle" class="vs-bc-subtitle"></span>
+        </div>
+      <div class="vs-bc-layout">
+        <div class="vs-bc-team">
+          <div class="bc-team-strip team1"></div>
+          <div id="vs-names1-broadcast" class="vs-bc-names"></div>
+        </div>
+        <div class="vs-bc-vs">VS</div>
+        <div class="vs-bc-team">
+          <div class="bc-team-strip team2"></div>
+          <div id="vs-names2-broadcast" class="vs-bc-names"></div>
+        </div>
+      </div>
       </div>
     </div>
   </div>
