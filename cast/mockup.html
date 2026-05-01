@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cast Receiver Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="receiver.css">
+  <style>
+    /* Mockup controls overlay */
+    #controls {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    #controls-panel {
+      background: rgba(0,0,0,0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.6rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      font-family: 'Manrope', sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      min-width: 200px;
+    }
+    #controls-panel label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+    #controls-panel select, #controls-panel input[type=range] {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.3rem;
+      color: #fff;
+      padding: 0.2rem 0.4rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    #controls-panel input[type=checkbox] { cursor: pointer; }
+    .ctrl-sep {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 0.2rem 0;
+    }
+    #toggle-btn {
+      background: #D5FB28;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 0.4rem;
+      padding: 0.4rem 0.9rem;
+      font-family: 'Manrope', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      align-self: flex-end;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Default (split-panel) theme -->
+  <div id="scoreboard" class="hidden">
+    <div id="team1" class="team-panel team1-bg">
+      <div id="serve1" class="serve-ball"></div>
+      <div id="score-container1" class="score-container">
+        <div id="points1" class="points">40</div>
+      </div>
+      <div id="medal1" class="medal hidden"><img src="trophy.svg" class="trophy-img"></div>
+      <div id="label1" class="team-label-pill team1-pill">Benjamin / Tison</div>
+    </div>
+    <div id="badge" class="badge hidden">TIEBREAK</div>
+    <div id="center-overlay">
+      <div id="dots-row" class="dots-row"></div>
+      <div id="format-label" class="format-label">CLASSIC (3 SETS)</div>
+      <div id="score-row-1" class="score-row large">
+        <span class="score-team1">1</span>
+        <span class="score-separator">·</span>
+        <span class="score-team2">0</span>
+      </div>
+      <div id="score-row-label" class="score-row-label">Games to 5</div>
+      <div id="score-row-2" class="score-row large">
+        <span class="score-team1">3</span>
+        <span class="score-separator">·</span>
+        <span class="score-team2">2</span>
+      </div>
+      <div id="duration" class="duration-label">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="duration-icon" fill="currentColor">
+          <path d="M360-840v-80h240v80H360Zm80 440h80v-240h-80v240Zm-99.5 291.5Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l56-56 56 56-56 56q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z"/>
+        </svg>
+        <span>0:47</span>
+      </div>
+    </div>
+    <div id="team2" class="team-panel team2-bg">
+      <div id="serve2" class="serve-ball hidden"></div>
+      <div id="score-container2" class="score-container">
+        <div id="points2" class="points">15</div>
+      </div>
+      <div id="medal2" class="medal hidden"><img src="trophy.svg" class="trophy-img"></div>
+      <div id="label2" class="team-label-pill team2-pill">Teodoro / Zapata</div>
+    </div>
+  </div>
+
+  <!-- Broadcast theme -->
+  <div id="scoreboard-broadcast" class="hidden">
+    <div class="bc-bg-image"></div>
+    <div class="bc-bg-overlay"></div>
+    <div class="bc-layout">
+      <div class="bc-top-row">
+        <div id="bc-header" class="bc-header">
+          <span id="bc-title" class="bc-title">Premier Padel Championship</span>
+        </div>
+        <div id="bc-duration" class="bc-duration">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" class="bc-duration-icon" fill="currentColor">
+            <path d="M360-840v-80h240v80H360Zm80 440h80v-240h-80v240Zm-99.5 291.5Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l56-56 56 56-56 56q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z"/>
+          </svg>
+          <span id="bc-duration-text">0:47</span>
+        </div>
+      </div>
+      <div class="bc-table-wrapper">
+      <div class="bc-table">
+        <div class="bc-col-header-row">
+          <div class="bc-name-header" id="bc-col-label">Quarter-Finals</div>
+          <div id="bc-set-headers" class="bc-set-headers"></div>
+          <div class="bc-point-header">POINT</div>
+        </div>
+        <div class="bc-divider"></div>
+        <div class="bc-row">
+          <div id="bc-strip1" class="bc-team-strip team1"></div>
+          <div id="bc-names1" class="bc-names-cell"></div>
+          <div id="bc-serve1" class="bc-serve-ball"><img src="tennis_ball.svg"></div>
+          <div id="bc-sets1" class="bc-sets-cell"></div>
+          <div id="bc-point-cell1" class="bc-point-cell serving">
+            <div class="bc-trophy hidden"><img src="trophy.svg" class="trophy-img"></div>
+            <div id="bc-star1" class="bc-star hidden">★</div>
+            <span class="bc-points">40</span>
+          </div>
+        </div>
+        <div class="bc-divider"></div>
+        <div class="bc-row">
+          <div id="bc-strip2" class="bc-team-strip team2"></div>
+          <div id="bc-names2" class="bc-names-cell"></div>
+          <div id="bc-serve2" class="bc-serve-ball hidden"><img src="tennis_ball.svg"></div>
+          <div id="bc-sets2" class="bc-sets-cell"></div>
+          <div id="bc-point-cell2" class="bc-point-cell">
+            <div class="bc-trophy hidden"><img src="trophy.svg" class="trophy-img"></div>
+            <div id="bc-star2" class="bc-star hidden">★</div>
+            <span class="bc-points">15</span>
+          </div>
+        </div>
+        <div class="bc-divider"></div>
+      </div>
+      <div id="bc-badge" class="bc-badge hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VS Preview -->
+  <div id="vs-screen" class="hidden">
+    <div id="vs-default-layout" class="hidden">
+      <div class="vs-panel vs-panel-team1">
+        <div id="vs-names1-default" class="vs-names"></div>
+      </div>
+      <div class="vs-center-default">
+        <span class="vs-label-default">VS</span>
+      </div>
+      <div class="vs-panel vs-panel-team2">
+        <div id="vs-names2-default" class="vs-names"></div>
+      </div>
+    </div>
+    <div id="vs-broadcast-layout" class="hidden">
+      <div class="bc-bg-image"></div>
+      <div class="bc-bg-overlay"></div>
+      <div class="vs-bc-outer">
+        <div id="vs-bc-header" class="bc-header hidden">
+          <span id="vs-bc-title" class="bc-title"></span>
+          <span id="vs-bc-subtitle" class="vs-bc-subtitle"></span>
+        </div>
+        <div class="vs-bc-layout">
+          <div class="vs-bc-team">
+            <div class="bc-team-strip team1"></div>
+            <div id="vs-names1-broadcast" class="vs-bc-names"></div>
+          </div>
+          <div class="vs-bc-vs">VS</div>
+          <div class="vs-bc-team">
+            <div class="bc-team-strip team2"></div>
+            <div id="vs-names2-broadcast" class="vs-bc-names"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <div id="controls-panel">
+      <label>Theme
+        <select id="sel-theme">
+          <option value="broadcast">Broadcast</option>
+          <option value="default">Default (split)</option>
+        </select>
+      </label>
+      <div class="ctrl-sep"></div>
+      <label>Format
+        <select id="sel-format">
+          <option value="classic3">Classic 3 sets</option>
+          <option value="classic1">Classic 1 set</option>
+          <option value="total">Total Games</option>
+          <option value="fixed">Fixed Point</option>
+        </select>
+      </label>
+      <label>Serving
+        <select id="sel-serve">
+          <option value="1">Team 1</option>
+          <option value="2">Team 2</option>
+        </select>
+      </label>
+      <label>Point
+        <select id="sel-point">
+          <option value="0/15">0 / 15</option>
+          <option value="15/30">15 / 30</option>
+          <option value="30/40">30 / 40</option>
+          <option value="40/15" selected>40 / 15</option>
+          <option value="AD/-">AD / –</option>
+          <option value="40/40">Deuce (40/40)</option>
+          <option value="★/★">Star Point</option>
+        </select>
+      </label>
+      <div class="ctrl-sep"></div>
+      <label>Match state
+        <select id="sel-state">
+          <option value="live">Live</option>
+          <option value="won1">Team 1 won</option>
+          <option value="won2">Team 2 won</option>
+          <option value="draw">Draw</option>
+          <option value="vs">VS Preview</option>
+        </select>
+      </label>
+      <div class="ctrl-sep"></div>
+      <label>Title bar <input type="checkbox" id="chk-title" checked></label>
+      <label>Background img <input type="checkbox" id="chk-bg"></label>
+    </div>
+    <button id="toggle-btn" onclick="document.getElementById('controls-panel').style.display = document.getElementById('controls-panel').style.display === 'none' ? '' : 'none'">Controls</button>
+  </div>
+
+<script>
+'use strict';
+
+// --- Mock data ---
+
+var TEAMS = [
+  { names: ['Benjamin Tison', 'Agustin Tapia'] },
+  { names: ['Teodoro Zapata', 'Paquito Navarro'] }
+];
+
+var FORMATS = {
+  classic3: {
+    label: 'CLASSIC (3 SETS)',
+    sets: [
+      { g1: 6, g2: 4, winner: 'TEAM_1' },
+      { g1: 4, g2: 6, winner: 'TEAM_2' },
+      { g1: 3, g2: 2, winner: null }
+    ],
+    bestOfSets: 3,
+    currentSet: 2
+  },
+  classic1: {
+    label: 'GAMES (5)',
+    sets: [{ g1: 3, g2: 2, winner: null }],
+    bestOfSets: 1,
+    currentSet: 0
+  },
+  total: {
+    label: 'TOTAL GAMES',
+    sets: [
+      { g1: 1, g2: 0, winner: 'TEAM_1' },
+      { g1: 0, g2: 1, winner: 'TEAM_2' },
+      { g1: 1, g2: 0, winner: 'TEAM_1' },
+      { g1: 0, g2: 0, winner: null }
+    ],
+    bestOfSets: null,
+    currentSet: 3,
+    totalGames: 6
+  },
+  fixed: {
+    label: '21 POINTS',
+    sets: [{ g1: 11, g2: 9, winner: null }],
+    bestOfSets: null,
+    currentSet: 0
+  }
+};
+
+// --- Element refs (broadcast) ---
+
+var bcNames1 = document.getElementById('bc-names1');
+var bcNames2 = document.getElementById('bc-names2');
+var bcSets1 = document.getElementById('bc-sets1');
+var bcSets2 = document.getElementById('bc-sets2');
+var bcSetHeaders = document.getElementById('bc-set-headers');
+var bcPointCell1 = document.getElementById('bc-point-cell1');
+var bcPointCell2 = document.getElementById('bc-point-cell2');
+var bcBadge = document.getElementById('bc-badge');
+var bcBroadcast = document.getElementById('scoreboard-broadcast');
+var bcHeader = document.getElementById('bc-header');
+
+// --- Render ---
+
+function renderNames(el, names) {
+  el.innerHTML = '';
+  names.forEach(function(n) {
+    var d = document.createElement('div');
+    d.className = 'bc-name';
+    d.textContent = n;
+    el.appendChild(d);
+  });
+}
+
+function renderSetCols(fmt, fmtKey, matchWinner) {
+  bcSetHeaders.innerHTML = '';
+  bcSets1.innerHTML = '';
+  bcSets2.innerHTML = '';
+
+  function hdr(t) {
+    var el = document.createElement('div');
+    el.className = 'bc-set-header-cell';
+    el.textContent = t;
+    bcSetHeaders.appendChild(el);
+  }
+  function score(container, val, cls) {
+    var el = document.createElement('div');
+    el.className = 'bc-set-score' + (cls ? ' ' + cls : '');
+    el.textContent = val;
+    container.appendChild(el);
+  }
+
+  if (fmtKey === 'fixed') return;
+
+  if (fmtKey === 'classic3') {
+    fmt.sets.forEach(function(s, i) {
+      hdr('S' + (i + 1));
+      var effectiveWinner = s.winner || (matchWinner && i === fmt.currentSet ? matchWinner : null);
+      var cls1 = effectiveWinner ? (effectiveWinner === 'TEAM_1' ? 'won' : 'lost') : '';
+      var cls2 = effectiveWinner ? (effectiveWinner === 'TEAM_2' ? 'won' : 'lost') : '';
+      score(bcSets1, s.g1, cls1);
+      score(bcSets2, s.g2, cls2);
+    });
+  } else {
+    hdr('GAMES');
+    var g1 = fmt.sets.reduce(function(s,x){return s+x.g1;},0);
+    var g2 = fmt.sets.reduce(function(s,x){return s+x.g2;},0);
+    var cls1 = matchWinner ? (matchWinner === 'TEAM_1' ? 'won' : 'lost') : '';
+    var cls2 = matchWinner ? (matchWinner === 'TEAM_2' ? 'won' : 'lost') : '';
+    score(bcSets1, g1, cls1);
+    score(bcSets2, g2, cls2);
+  }
+}
+
+function getPointTexts() {
+  var sel = document.getElementById('sel-point').value;
+  var parts = sel.split('/');
+  return [parts[0].trim(), parts[1].trim()];
+}
+
+function getServingTeam() {
+  return parseInt(document.getElementById('sel-serve').value);
+}
+
+function update() {
+  var theme = document.getElementById('sel-theme').value;
+  var fmtKey = document.getElementById('sel-format').value;
+  var state = document.getElementById('sel-state').value;
+  var showTitle = document.getElementById('chk-title').checked;
+  var showBg = document.getElementById('chk-bg').checked;
+  var fmt = FORMATS[fmtKey];
+
+  var scoreboardDefault = document.getElementById('scoreboard');
+  var vsScreen = document.getElementById('vs-screen');
+  var vsDefaultLayout = document.getElementById('vs-default-layout');
+  var vsBroadcastLayout = document.getElementById('vs-broadcast-layout');
+  var mockBg = showBg ? "url('https://images.unsplash.com/photo-1646649853703-7645147474ba?w=1920&q=80')" : 'none';
+
+  // VS Preview state — works for both themes
+  if (state === 'vs') {
+    scoreboardDefault.classList.add('hidden');
+    bcBroadcast.classList.add('hidden');
+    vsScreen.classList.remove('hidden');
+    var isBc = theme === 'broadcast';
+    vsDefaultLayout.classList.toggle('hidden', isBc);
+    vsBroadcastLayout.classList.toggle('hidden', !isBc);
+    function renderVsNames(el, names, cls) {
+      el.innerHTML = '';
+      names.split(' / ').forEach(function(n) {
+        var d = document.createElement('div'); d.className = cls; d.textContent = n; el.appendChild(d);
+      });
+    }
+    renderVsNames(document.getElementById('vs-names1-default'), TEAMS[0].names.join(' / '), 'vs-name');
+    renderVsNames(document.getElementById('vs-names2-default'), TEAMS[1].names.join(' / '), 'vs-name');
+    renderVsNames(document.getElementById('vs-names1-broadcast'), TEAMS[0].names.join(' / '), 'bc-name');
+    renderVsNames(document.getElementById('vs-names2-broadcast'), TEAMS[1].names.join(' / '), 'bc-name');
+    if (isBc) {
+      var vsBgLayer = vsBroadcastLayout.querySelector('.bc-bg-image');
+      if (vsBgLayer) { vsBgLayer.style.backgroundImage = mockBg; vsBgLayer.classList.toggle('loaded', mockBg !== 'none'); }
+      var vsBcHeader = document.getElementById('vs-bc-header');
+      if (showTitle) {
+        document.getElementById('vs-bc-title').textContent = 'Premier Padel Championship';
+        document.getElementById('vs-bc-subtitle').textContent = 'Quarter-Finals';
+        vsBcHeader.classList.remove('hidden');
+      } else {
+        vsBcHeader.classList.add('hidden');
+      }
+    }
+    return;
+  }
+
+  vsScreen.classList.add('hidden');
+
+  // Toggle themes
+  var isDefault = theme === 'default';
+  scoreboardDefault.classList.toggle('hidden', !isDefault);
+  bcBroadcast.classList.toggle('hidden', isDefault);
+
+  // Default theme: update badge + points
+  if (isDefault) {
+    var defaultBadge = document.getElementById('badge');
+    var pts1 = document.getElementById('points1');
+    var pts2 = document.getElementById('points2');
+    var med1 = document.getElementById('medal1');
+    var med2 = document.getElementById('medal2');
+    var sc1 = document.getElementById('score-container1');
+    var sc2 = document.getElementById('score-container2');
+    var sv1 = document.getElementById('serve1');
+    var sv2 = document.getElementById('serve2');
+
+    defaultBadge.classList.add('hidden');
+    defaultBadge.textContent = '';
+    med1.classList.add('hidden'); med2.classList.add('hidden');
+    sc1.style.display = ''; sc2.style.display = '';
+
+    var serving = getServingTeam();
+    sv1.classList.toggle('hidden', serving !== 1);
+    sv2.classList.toggle('hidden', serving !== 2);
+
+    if (state === 'won1') {
+      sc1.style.display = 'none';
+      med1.classList.remove('hidden');
+      pts2.textContent = '';
+    } else if (state === 'won2') {
+      sc2.style.display = 'none';
+      med2.classList.remove('hidden');
+      pts1.textContent = '';
+    } else if (state === 'draw') {
+      pts1.textContent = '—'; pts2.textContent = '—';
+      defaultBadge.textContent = 'DRAW';
+      defaultBadge.classList.remove('hidden');
+    } else {
+      var pointSel = document.getElementById('sel-point').value;
+      if (pointSel === '★/★') {
+        pts1.textContent = '★'; pts2.textContent = '★';
+        defaultBadge.textContent = 'STAR POINT';
+        defaultBadge.classList.remove('hidden');
+      } else if (pointSel === '40/40') {
+        pts1.textContent = '40'; pts2.textContent = '40';
+        defaultBadge.textContent = 'DEUCE';
+        defaultBadge.classList.remove('hidden');
+      } else if (pointSel === 'AD/-') {
+        pts1.textContent = 'AD'; pts2.textContent = '';
+      } else {
+        var p = pointSel.split('/');
+        pts1.textContent = p[0].trim(); pts2.textContent = p[1].trim();
+      }
+    }
+    return;
+  }
+
+  // Background
+  var bcBgLayer = bcBroadcast.querySelector('.bc-bg-image');
+  if (bcBgLayer) { bcBgLayer.style.backgroundImage = mockBg; bcBgLayer.classList.toggle('loaded', mockBg !== 'none'); }
+
+  // Title bar
+  bcHeader.classList.toggle('hidden', !showTitle);
+  document.getElementById('bc-col-label').textContent = showTitle ? 'Quarter-Finals' : '';
+
+  // Names + strips (row1 = team1, row2 = team2 in mockup — no swap control)
+  renderNames(bcNames1, TEAMS[0].names);
+  renderNames(bcNames2, TEAMS[1].names);
+  document.getElementById('bc-strip1').className = 'bc-team-strip team1';
+  document.getElementById('bc-strip2').className = 'bc-team-strip team2';
+
+  // Set columns
+  var matchWinner = state === 'won1' ? 'TEAM_1' : state === 'won2' ? 'TEAM_2' : null;
+  renderSetCols(fmt, fmtKey, matchWinner);
+
+  // Point cells — reset
+  bcPointCell1.classList.remove('serving');
+  bcPointCell2.classList.remove('serving');
+  bcBadge.classList.add('hidden');
+  bcBadge.textContent = '';
+
+  var pts1el = bcPointCell1.querySelector('.bc-points');
+  var pts2el = bcPointCell2.querySelector('.bc-points');
+  var trophy1 = bcPointCell1.querySelector('.bc-trophy');
+  var trophy2 = bcPointCell2.querySelector('.bc-trophy');
+  pts1el.classList.remove('hidden', 'advantage');
+  pts2el.classList.remove('hidden', 'advantage');
+  document.getElementById('bc-star1').classList.add('hidden');
+  document.getElementById('bc-star2').classList.add('hidden');
+  trophy1.classList.add('hidden');
+  trophy2.classList.add('hidden');
+  document.getElementById('bc-serve1').classList.add('hidden');
+  document.getElementById('bc-serve2').classList.add('hidden');
+
+  if (state === 'won1') {
+    pts1el.classList.add('hidden');
+    trophy1.classList.remove('hidden');
+    pts2el.textContent = '';
+  } else if (state === 'won2') {
+    pts2el.classList.add('hidden');
+    trophy2.classList.remove('hidden');
+    pts1el.textContent = '';
+  } else if (state === 'draw') {
+    pts1el.textContent = '\u2014';
+    pts2el.textContent = '\u2014';
+    bcBadge.textContent = 'DRAW';
+    bcBadge.classList.remove('hidden');
+  } else {
+    var pointSel = document.getElementById('sel-point').value;
+    var pts = pointSel.split('/');
+    var p1 = pts[0].trim();
+    var p2 = pts[1].trim();
+
+    pts1el.classList.remove('advantage');
+    pts2el.classList.remove('advantage');
+
+    if (pointSel === '★/★') {
+      pts1el.classList.add('hidden');
+      pts2el.classList.add('hidden');
+      document.getElementById('bc-star1').classList.remove('hidden');
+      document.getElementById('bc-star2').classList.remove('hidden');
+      bcBadge.textContent = 'STAR POINT';
+      bcBadge.classList.remove('hidden');
+    } else if (pointSel === '40/40') {
+      p1 = '40'; p2 = '40';
+      bcBadge.textContent = 'DEUCE';
+      bcBadge.classList.remove('hidden');
+    } else if (pointSel === 'AD/-') {
+      p1 = 'AD'; p2 = '';
+      pts1el.classList.add('advantage');
+    }
+
+    if (pointSel !== '★/★') {
+      pts1el.textContent = p1;
+      pts2el.textContent = p2;
+    }
+
+    var serving = getServingTeam();
+    document.getElementById('bc-serve1').classList.toggle('hidden', serving !== 1);
+    document.getElementById('bc-serve2').classList.toggle('hidden', serving !== 2);
+    if (serving === 1) bcPointCell1.classList.add('serving');
+    else bcPointCell2.classList.add('serving');
+  }
+}
+
+// Wire controls
+['sel-theme','sel-format','sel-serve','sel-point','sel-state'].forEach(function(id) {
+  document.getElementById(id).addEventListener('change', update);
+});
+['chk-title','chk-bg'].forEach(function(id) {
+  document.getElementById(id).addEventListener('change', update);
+});
+
+update();
+</script>
+</body>
+</html>
