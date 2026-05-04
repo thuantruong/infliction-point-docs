@@ -189,6 +189,11 @@ html, body {
   flex-shrink: 0;
 }
 
+.duration-separator {
+  opacity: 0.5;
+  margin: 0 0.2em;
+}
+
 .badge {
   position: absolute;
   top: 25%;
@@ -286,6 +291,11 @@ html, body {
   width: 1em;
   height: 1em;
   flex-shrink: 0;
+}
+
+.bc-duration-separator {
+  opacity: 0.5;
+  margin: 0 0.3em;
 }
 
 .bc-table-wrapper {

@@ -69,6 +69,8 @@ const dotsRowEl = document.getElementById('dots-row');
 const badgeEl = document.getElementById('badge');
 const durationEl = document.getElementById('duration');
 const durationTextEl = document.getElementById('duration-text');
+const currentTimeTextEl = document.getElementById('current-time-text');
+const bcCurrentTimeTextEl = document.getElementById('bc-current-time-text');
 
 var durationInterval = null;
 var themeConfig = null;
@@ -316,6 +318,10 @@ function showScoreboard() {
 
 // --- Rendering ---
 
+function formatCurrentTime() {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 function formatDuration(ms) {
   var totalMin = Math.floor(ms / 60000);
   var h = Math.floor(totalMin / 60);
@@ -415,11 +421,13 @@ function renderDefaultTheme(state, sidesSwapped) {
   var endMs = state.matchEndTime || 0;
   if (startMs > 0) {
     durationEl.classList.remove('hidden');
+    currentTimeTextEl.textContent = formatCurrentTime();
     if (endMs > 0) {
       durationTextEl.textContent = formatDuration(endMs - startMs);
     } else {
       durationTextEl.textContent = formatDuration(Date.now() - startMs);
       durationInterval = setInterval(function() {
+        currentTimeTextEl.textContent = formatCurrentTime();
         durationTextEl.textContent = formatDuration(Date.now() - startMs);
       }, 60000);
     }
@@ -733,11 +741,13 @@ function renderBroadcastTheme(state) {
   var endMs = state.matchEndTime || 0;
   if (startMs > 0) {
     bcDurationEl.classList.remove('hidden');
+    bcCurrentTimeTextEl.textContent = formatCurrentTime();
     if (endMs > 0) {
       bcDurationTextEl.textContent = formatDuration(endMs - startMs);
     } else {
       bcDurationTextEl.textContent = formatDuration(Date.now() - startMs);
       durationInterval = setInterval(function() {
+        bcCurrentTimeTextEl.textContent = formatCurrentTime();
         bcDurationTextEl.textContent = formatDuration(Date.now() - startMs);
       }, 60000);
     }
