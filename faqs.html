@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQs — Infliction Point</title>
+  <meta name="description" content="Frequently asked questions for Infliction Point — match formats, scoring rules, and accessory setup.">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .faqs-content { max-width: 720px; margin: 0 auto; }
+
+    .faqs-content h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--heading-color);
+      margin-bottom: 8px;
+    }
+
+    .faqs-content .subtitle {
+      font-size: 0.95rem;
+      margin-bottom: 56px;
+    }
+
+    .faq-section { margin-bottom: 48px; }
+
+    .faq-section-heading {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--electric-lime);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--ghost-border);
+    }
+
+    details {
+      background: var(--surface-high);
+      border: 1px solid var(--ghost-border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    details[open] {
+      border-color: rgba(213, 251, 40, 0.25);
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 20px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--heading-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: '+';
+      font-size: 1.2rem;
+      color: var(--electric-lime);
+      font-weight: 400;
+      flex-shrink: 0;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(45deg);
+    }
+
+    .faq-body {
+      padding: 0 20px 16px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--on-surface-variant);
+    }
+
+    .faq-body p { margin-bottom: 10px; }
+    .faq-body p:last-child { margin-bottom: 0; }
+
+    .faq-body ul {
+      list-style: none;
+      margin: 10px 0;
+    }
+
+    .faq-body ul li {
+      padding: 4px 0 4px 16px;
+      position: relative;
+    }
+
+    .faq-body ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--electric-lime);
+      font-size: 0.8rem;
+    }
+
+    .faq-body strong { color: var(--heading-color); font-weight: 600; }
+
+    .faq-toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 48px;
+    }
+
+    .faq-toc a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+      background: var(--surface-high);
+      border: 1px solid var(--ghost-border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .faq-toc a:hover {
+      color: var(--heading-color);
+      border-color: rgba(173, 170, 170, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="container">
+      <a href="index.html" class="nav-brand"><img src="images/favicon.png" alt="Infliction Point" class="nav-icon"></a>
+      <ul class="nav-links">
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#formats">Formats</a></li>
+        <li><a href="index.html#screenshots">Screenshots</a></li>
+        <li><a href="index.html#download">Download</a></li>
+        <li><a href="faqs.html">FAQs</a></li>
+      </ul>
+      <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- FAQs -->
+  <section style="padding-top: 100px;">
+    <div class="container faqs-content">
+      <h1>FAQs</h1>
+      <p class="subtitle">Answers to common questions about match formats, scoring rules, and accessories.</p>
+
+      <!-- TOC -->
+      <nav class="faq-toc" aria-label="Jump to section">
+        <a href="#classic">Classic</a>
+        <a href="#total-games">Total Games</a>
+        <a href="#fixed-points">Fixed Points</a>
+        <a href="#accessories">Accessories</a>
+      </nav>
+
+      <!-- Classic -->
+      <div class="faq-section" id="classic">
+        <p class="faq-section-heading">Classic format</p>
+
+        <details>
+          <summary>What is Classic format?</summary>
+          <div class="faq-body">
+            <p>Classic is the standard padel/tennis scoring structure: points (0 / 15 / 30 / 40), games, and sets. The first team to win the configured number of sets wins the match.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How many sets can I play?</summary>
+          <div class="faq-body">
+            <p>You can choose best of 1, 2, 3, 4, or 5 sets. Odd totals (1, 3, 5) always produce a winner. Even totals (2, 4) can end in a tie or be decided with a Super Tiebreak — configurable in the setup screen.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How many games per set?</summary>
+          <div class="faq-body">
+            <p>Sets can be played to 3, 4, 5, or 6 games. The first team to reach the target wins the set, subject to the tiebreak rule you've chosen.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What are the deuce rules?</summary>
+          <div class="faq-body">
+            <p>Three options apply when a game reaches 40–40:</p>
+            <ul>
+              <li><strong>Golden Point</strong> — the next point wins the game outright.</li>
+              <li><strong>Advantage</strong> — a team must win two consecutive points to take the game.</li>
+              <li><strong>Star Point</strong> — after two deuces the game becomes sudden death; the next point wins.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is a tiebreak?</summary>
+          <div class="faq-body">
+            <p>When both teams reach a set-score tie (e.g. 5–5 in a 6-game set), a tiebreak is played — first to 7 points, win by 2.</p>
+            <p>Two optional sub-rules are available when Tiebreak is selected:</p>
+            <ul>
+              <li><strong>Short Set</strong> — the tiebreak triggers one game earlier (e.g. 4–4 in a 6-game set), and the winning team takes the set by one game (5–4).</li>
+              <li><strong>Sudden Death</strong> — at 6–6 in the tiebreak, the next point wins instead of requiring a 2-point lead.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is a Super Tiebreak / Match Tiebreak?</summary>
+          <div class="faq-body">
+            <p>For even-set formats (2 or 4 sets), if sets are tied at the end you can play a Super Tiebreak to decide the match — first to 10 points, win by 2. An optional Sudden Death sub-rule makes the point at 9–9 decisive.</p>
+            <p>If you prefer not to play on, choose <strong>No Margin</strong> instead and the match ends in a draw.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is Auto Change Ends?</summary>
+          <div class="faq-body">
+            <p>When enabled, the app automatically flips the court-side display after every odd-total game in a set — and every 6 tiebreak points — matching the standard padel rotation rule. A "Change ends" voice announcement plays at each swap.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Total Games -->
+      <div class="faq-section" id="total-games">
+        <p class="faq-section-heading">Total Games format</p>
+
+        <details>
+          <summary>What is Total Games format?</summary>
+          <div class="faq-body">
+            <p>A fixed number of games is played (3–9) with no sets. Deuce rules (Golden Point, Advantage, or Star Point) still apply to each individual game. The team that wins the most games wins the match.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Can it end in a draw?</summary>
+          <div class="faq-body">
+            <p>Yes — even-game totals (4, 6, 8) can end in a draw if both teams win the same number of games. Odd totals (3, 5, 7, 9) always produce a winner.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Does serve rotation work in Total Games?</summary>
+          <div class="faq-body">
+            <p>Serve follows the same game-by-game pattern as Classic — the server alternates each game, and you can switch manually before the first point or via an accessory button.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Fixed Points -->
+      <div class="faq-section" id="fixed-points">
+        <p class="faq-section-heading">Fixed Points format</p>
+
+        <details>
+          <summary>What is Fixed Points format?</summary>
+          <div class="faq-body">
+            <p>Each tap scores exactly one raw point — there's no 0 / 15 / 30 / 40 cycle, no games, and no sets. A fixed total of points is played (16, 21, 24, or 32). The team with more points at the end wins.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How does serve rotation work?</summary>
+          <div class="faq-body">
+            <p>Serve rotates automatically every N points. You can set N to 1, 2, 3, 4, or 5 — the default is 2. The current server is shown by a tennis-ball indicator on the scoreboard.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is the tiebreak at halfway?</summary>
+          <div class="faq-body">
+            <p>For even-point totals (16, 24, 32), if scores are tied when exactly half the points have been played, a tiebreak can be triggered. Three options:</p>
+            <ul>
+              <li><strong>No Margin</strong> — the match ends in a draw.</li>
+              <li><strong>Golden Point</strong> — one sudden-death point decides the match.</li>
+              <li><strong>Advantage</strong> — play continues until one team leads by 2 points.</li>
+            </ul>
+            <p>The 21-point format has an odd total and never triggers a tiebreak.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Accessories -->
+      <div class="faq-section" id="accessories">
+        <p class="faq-section-heading">Accessories</p>
+
+        <details>
+          <summary>What are Flic buttons?</summary>
+          <div class="faq-body">
+            <p>First-generation Flic Bluetooth buttons let you score hands-free from anywhere on the court. Pair up to 2 buttons from the Accessories screen (requires the Flic app to be installed).</p>
+            <ul>
+              <li><strong>1-button mode</strong> — single click: Team 1 point; double click: Team 2 point; hold: undo.</li>
+              <li><strong>2-button mode</strong> — single click: point for that button's assigned team; double click: reannounce score; hold: undo (or switch serve before the first point).</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is a shutter remote?</summary>
+          <div class="faq-body">
+            <p>Bluetooth camera shutter remotes (the kind used as phone selfie clickers) connect as HID keyboard devices. Infliction Point detects their key presses and lets you map each button to a scoreboard action: score a point, undo, call a fault, service let, rally let, out, reannounce, or play a custom sound.</p>
+            <p>Configure mappings from <strong>Accessories → Shutter Remote</strong>.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What is the LED display?</summary>
+          <div class="faq-body">
+            <p>Our LED matrix display connects over Bluetooth and shows the live score in real time.</p>
+            <ul>
+              <li>64×32 RGB with team colors, serve arrow, and animations.</li>
+            </ul>
+            <p>Connect from <strong>Accessories → LED Display</strong>. Brightness is adjustable, and the display message while waiting for a match is customisable.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How does Chromecast work?</summary>
+          <div class="faq-body">
+            <p>Tap the cast icon in <strong>Accessories → Chromecast</strong> to connect to any Chromecast-enabled TV on the same network. A full-screen scoreboard appears on the TV and updates live with every point scored.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How does the Wear OS companion app work?</summary>
+          <div class="faq-body">
+            <p>Install Infliction Point on your Wear OS 3+ watch from the Play Store. It pairs automatically with the phone app over the Wearable Data Layer — no manual setup needed.</p>
+            <p>From your wrist you can score, undo, switch serve, reannounce, and trigger announcements (fault, let, out, custom sounds). The watch also shows a live match stats page and vibrates on scoring events — short pulse for points, longer for games and sets.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Can I use multiple accessories at the same time?</summary>
+          <div class="faq-body">
+            <p>Yes. Flic buttons, shutter remotes, the LED display, Chromecast, and the Wear OS watch all work independently and simultaneously. Each updates from the same match state.</p>
+          </div>
+        </details>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <span>&copy; 2an.dev. All rights reserved.</span>
+      <ul class="footer-links">
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="mailto:infliction-point@2an.dev">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
