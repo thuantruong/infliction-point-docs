@@ -98,6 +98,34 @@ function setBroadcastBg(containerEl, bgImg) {
   img.src = src;
 }
 
+function applyBroadcastOverlay(containerEl) {
+  var overlay = containerEl.querySelector('.bc-bg-overlay');
+  if (!overlay) return;
+  overlay.style.background = (themeConfig && themeConfig.backgroundImageColor) ? themeConfig.backgroundImageColor : '';
+}
+
+function applyBroadcastScoreboardBg(containerEl) {
+  var table = containerEl.querySelector('.bc-table');
+  if (!table) return;
+  table.style.background = (themeConfig && themeConfig.scoreboardBackground) ? themeConfig.scoreboardBackground : '';
+}
+
+function applyBroadcastTextColor(containerEl) {
+  if (themeConfig && themeConfig.textColor) {
+    containerEl.style.setProperty('--bc-text-color', themeConfig.textColor);
+  } else {
+    containerEl.style.removeProperty('--bc-text-color');
+  }
+}
+
+function applyBroadcastAccentColor(containerEl) {
+  if (themeConfig && themeConfig.textColorAccent) {
+    containerEl.style.setProperty('--bc-accent-color', themeConfig.textColorAccent);
+  } else {
+    containerEl.style.removeProperty('--bc-accent-color');
+  }
+}
+
 // --- Cast Receiver Setup ---
 
 const castContext = cast.framework.CastReceiverContext.getInstance();
@@ -282,6 +310,10 @@ function showIdle(playlistUrl) {
       themeConfig = {
         theme: data.theme || 'default',
         backgroundImage: data.backgroundImage || null,
+        backgroundImageColor: data.backgroundImageColor || null,
+        scoreboardBackground: data.scoreboardBackground || null,
+        textColor: data.textColor || null,
+        textColorAccent: data.textColorAccent || null,
         title: data.title || null,
         subtitle: data.subtitle || null,
       };
@@ -313,6 +345,10 @@ function showScoreboard() {
       bgImg = "url('" + bgSrc + "')";
     }
     setBroadcastBg(scoreboardBroadcastEl, bgImg);
+    applyBroadcastOverlay(scoreboardBroadcastEl);
+    applyBroadcastScoreboardBg(scoreboardBroadcastEl);
+    applyBroadcastTextColor(scoreboardBroadcastEl);
+    applyBroadcastAccentColor(scoreboardBroadcastEl);
   }
 }
 
@@ -378,6 +414,10 @@ function showVsPreview(team1Names, team2Names) {
       bgImg = "url('" + bgSrc + "')";
     }
     setBroadcastBg(vsBroadcastLayoutEl, bgImg);
+    applyBroadcastOverlay(vsBroadcastLayoutEl);
+    applyBroadcastScoreboardBg(vsBroadcastLayoutEl);
+    applyBroadcastTextColor(vsBroadcastLayoutEl);
+    applyBroadcastAccentColor(vsBroadcastLayoutEl);
   }
 }
 
