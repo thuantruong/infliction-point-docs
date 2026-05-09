@@ -483,6 +483,8 @@ function update() {
       else vsBroadcastLayout.style.removeProperty('--bc-text-color');
       if (accentColorVal) vsBroadcastLayout.style.setProperty('--bc-accent-color', accentColorVal);
       else vsBroadcastLayout.style.removeProperty('--bc-accent-color');
+      var vsLayout = vsBroadcastLayout.querySelector('.vs-bc-layout');
+      if (vsLayout) vsLayout.style.background = sbColorVal || '';
       var vsBcHeader = document.getElementById('vs-bc-header');
       if (showTitle) {
         document.getElementById('vs-bc-title').textContent = titleVal;

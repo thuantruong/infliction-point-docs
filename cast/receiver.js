@@ -105,9 +105,9 @@ function applyBroadcastOverlay(containerEl) {
 }
 
 function applyBroadcastScoreboardBg(containerEl) {
-  var table = containerEl.querySelector('.bc-table');
-  if (!table) return;
-  table.style.background = (themeConfig && themeConfig.scoreboardBackground) ? themeConfig.scoreboardBackground : '';
+  var target = containerEl.querySelector('.bc-table') || containerEl.querySelector('.vs-bc-layout');
+  if (!target) return;
+  target.style.background = (themeConfig && themeConfig.scoreboardBackground) ? themeConfig.scoreboardBackground : '';
 }
 
 function applyBroadcastTextColor(containerEl) {
@@ -433,6 +433,9 @@ function renderMatchState(state, sidesSwapped) {
 function renderDefaultTheme(state, sidesSwapped) {
   var config = state.config;
   var format = config.matchFormat;
+  var isAtDeuce = state.isDeuce ||
+    (!state.isTiebreak && !state.isStarPoint && !state.advantageTeam &&
+     state.pointsTeam1 === 'FORTY' && state.pointsTeam2 === 'FORTY');
 
   // Swap panel backgrounds and labels
   var team1Panel = document.getElementById('team1');
@@ -531,7 +534,7 @@ function renderTeamPanels(state, format, sidesSwapped) {
   } else if (state.isStarPoint) {
     text1 = '★';
     text2 = '★';
-  } else if (state.isDeuce) {
+  } else if (isAtDeuce) {
     text1 = '40';
     text2 = '40';
   } else {
@@ -627,7 +630,7 @@ function renderCenterOverlay(state, config, format, sidesSwapped) {
   if (state.isStarPoint && format !== 'FIXED_POINT') {
     badgeEl.textContent = 'STAR POINT';
     badgeEl.classList.remove('hidden');
-  } else if (state.isDeuce && !state.advantageTeam && format !== 'FIXED_POINT') {
+  } else if (isAtDeuce && format !== 'FIXED_POINT') {
     badgeEl.textContent = 'DEUCE';
     badgeEl.classList.remove('hidden');
   }
@@ -761,6 +764,9 @@ function renderBroadcastTheme(state) {
   var format = config.matchFormat;
   var isOver = state.isMatchOver;
   var winner = state.matchWinner;
+  var isAtDeuce = state.isDeuce ||
+    (!state.isTiebreak && !state.isStarPoint && !state.advantageTeam &&
+     state.pointsTeam1 === 'FORTY' && state.pointsTeam2 === 'FORTY');
   var isDraw = isOver && !winner;
   var leftTeam = sidesSwapped ? 'TEAM_2' : 'TEAM_1';
   var rightTeam = sidesSwapped ? 'TEAM_1' : 'TEAM_2';
@@ -861,7 +867,7 @@ function renderBroadcastTheme(state) {
       bcStar2El.classList.remove('hidden');
       bcBadgeEl.textContent = 'STAR POINT';
       bcBadgeEl.classList.remove('hidden');
-    } else if (state.isDeuce) {
+    } else if (isAtDeuce) {
       text1 = '40';
       text2 = '40';
       bcBadgeEl.textContent = 'DEUCE';
