@@ -939,6 +939,7 @@ castContext.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED
 // Start receiver
 var options = new cast.framework.CastReceiverOptions();
 options.disableIdleTimeout = true;
+options.maxInactivity = 86400;
 castContext.start(options);
 
 // Start in idle mode
