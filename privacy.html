@@ -43,61 +43,66 @@
     <div class="container">
       <a href="index.html" class="nav-brand"><img src="images/favicon.png" alt="Infliction Point" class="nav-icon"></a>
       <ul class="nav-links">
-        <li><a href="index.html#features">Features</a></li>
-        <li><a href="index.html#formats">Formats</a></li>
-        <li><a href="index.html#download">Download</a></li>
-        <li><a href="faqs.html">FAQs</a></li>
+        <li><a href="index.html#features" data-i18n="nav.features">Features</a></li>
+        <li><a href="index.html#formats" data-i18n="nav.formats">Formats</a></li>
+        <li><a href="index.html#download" data-i18n="nav.download">Download</a></li>
+        <li><a href="faqs.html" data-i18n="nav.faqs">FAQs</a></li>
       </ul>
       <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+        <button class="lang-btn" data-lang="id" aria-pressed="false">ID</button>
+      </div>
     </div>
   </nav>
 
   <!-- Privacy Policy -->
   <section style="padding-top: 100px;">
     <div class="container privacy-content">
-      <h1>Privacy Policy</h1>
-      <p class="last-updated">Last updated: April 19, 2026</p>
+      <h1 data-i18n="priv.title">Privacy Policy</h1>
+      <p class="last-updated" data-i18n="priv.updated">Last updated: April 19, 2026</p>
 
-      <h2>Data Collection</h2>
-      <p>Infliction Point does not collect, transmit, or share any personal data with external servers. All data is stored locally on your device only.</p>
+      <h2 data-i18n="priv.h.collection">Data Collection</h2>
+      <p data-i18n="priv.p.collection">Infliction Point does not collect, transmit, or share any personal data with external servers. All data is stored locally on your device only.</p>
 
-      <h2>Match History</h2>
-      <p>Completed match results are saved locally in an on-device database (SQLite via Room) so you can review past matches. This data never leaves your device and can be deleted at any time from within the app.</p>
+      <h2 data-i18n="priv.h.history">Match History</h2>
+      <p data-i18n="priv.p.history">Completed match results are saved locally in an on-device database (SQLite via Room) so you can review past matches. This data never leaves your device and can be deleted at any time from within the app.</p>
 
-      <h2>Player Names</h2>
-      <p>If you use the player assignment feature, the names you enter are stored locally in an on-device database for convenience (autofill suggestions and match history display). Player names are never transmitted externally. You can delete individual players or clear the entire directory from within the app.</p>
+      <h2 data-i18n="priv.h.players">Player Names</h2>
+      <p data-i18n="priv.p.players">If you use the player assignment feature, the names you enter are stored locally in an on-device database for convenience (autofill suggestions and match history display). Player names are never transmitted externally. You can delete individual players or clear the entire directory from within the app.</p>
 
-      <h2>Wearable Data Layer</h2>
-      <p>If you use the Wear OS companion app, match state is synced between your phone and watch via Google's Wearable Data Layer API. This data stays entirely on your devices and is not sent to any external server.</p>
+      <h2 data-i18n="priv.h.wearable">Wearable Data Layer</h2>
+      <p data-i18n="priv.p.wearable">If you use the Wear OS companion app, match state is synced between your phone and watch via Google's Wearable Data Layer API. This data stays entirely on your devices and is not sent to any external server.</p>
 
-      <h2>Third-Party Services</h2>
-      <p>The app uses Android's built-in Text-to-Speech engine for score announcements. No data is sent to 2an.dev or any third-party servers.</p>
+      <h2 data-i18n="priv.h.thirdparty">Third-Party Services</h2>
+      <p data-i18n="priv.p.thirdparty">The app uses Android's built-in Text-to-Speech engine for score announcements. No data is sent to 2an.dev or any third-party servers.</p>
 
-      <h2>Bluetooth Devices</h2>
-      <p>If you pair a Flic button, its MAC address is stored locally on your device in SharedPreferences for reconnection purposes. If you configure a Bluetooth shutter remote, key mappings are stored locally. No Bluetooth device data is transmitted externally.</p>
+      <h2 data-i18n="priv.h.bluetooth">Bluetooth Devices</h2>
+      <p data-i18n="priv.p.bluetooth">If you pair a Flic button, its MAC address is stored locally on your device in SharedPreferences for reconnection purposes. If you configure a Bluetooth shutter remote, key mappings are stored locally. No Bluetooth device data is transmitted externally.</p>
 
-      <h2>Changes to This Policy</h2>
-      <p>We may update this privacy policy from time to time. Any changes will be reflected on this page with an updated revision date.</p>
+      <h2 data-i18n="priv.h.changes">Changes to This Policy</h2>
+      <p data-i18n="priv.p.changes">We may update this privacy policy from time to time. Any changes will be reflected on this page with an updated revision date.</p>
 
-      <h2>Contact</h2>
-      <p>If you have questions about this privacy policy, contact us at <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a>.</p>
+      <h2 data-i18n="priv.h.contact">Contact</h2>
+      <p data-i18n-html="priv.p.contact">If you have questions about this privacy policy, contact us at <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a>.</p>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <span>&copy; 2an.dev. All rights reserved.</span>
+      <span data-i18n="footer.copyright">&copy; 2an.dev. All rights reserved.</span>
       <ul class="footer-links">
-        <li><a href="privacy.html">Privacy Policy</a></li>
-        <li><a href="mailto:infliction-point@2an.dev">Contact</a></li>
-        <li><a href="https://www.instagram.com/inflictionpoint/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Instagram</a></li>
+        <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
+        <li><a href="mailto:infliction-point@2an.dev" data-i18n="footer.contact">Contact</a></li>
+        <li><a href="https://www.instagram.com/inflictionpoint/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg><span data-i18n="footer.instagram">Instagram</span></a></li>
       </ul>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
+  <script src="js/i18n.js"></script>
 </body>
 </html>

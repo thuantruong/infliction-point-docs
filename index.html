@@ -25,14 +25,18 @@
     <div class="container">
       <a href="#" class="nav-brand"><img src="images/favicon.png" alt="Infliction Point" class="nav-icon"></a>
       <ul class="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#formats">Formats</a></li>
-        <li><a href="#download">Download</a></li>
-        <li><a href="faqs.html">FAQs</a></li>
+        <li><a href="#features" data-i18n="nav.features">Features</a></li>
+        <li><a href="#formats" data-i18n="nav.formats">Formats</a></li>
+        <li><a href="#download" data-i18n="nav.download">Download</a></li>
+        <li><a href="faqs.html" data-i18n="nav.faqs">FAQs</a></li>
       </ul>
       <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+        <button class="lang-btn" data-lang="id" aria-pressed="false">ID</button>
+      </div>
     </div>
   </nav>
 
@@ -42,16 +46,16 @@
       <div class="hero-visual">
         <img src="images/logo.png" alt="Infliction Point" class="hero-logo">
       </div>
-      <h1>SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span></h1>
+      <h1 data-i18n-html="hero.headline">SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span></h1>
       <div class="hero-sub">
         <div class="tagline-block">
-          <div class="tagline-line">TAP</div>
-          <div class="tagline-line">SCORE</div>
-          <div class="tagline-line">PLAY</div>
+          <div class="tagline-line" data-i18n="hero.tagline1">TAP</div>
+          <div class="tagline-line" data-i18n="hero.tagline2">SCORE</div>
+          <div class="tagline-line" data-i18n="hero.tagline3">PLAY</div>
         </div>
-        <p>Tap with your phone, watch, or a remote.<br>See scores on an LED display or TV.<br>Stay in the game flow.</p>
+        <p data-i18n-html="hero.body">Tap with your phone, watch, or a remote.<br>See scores on an LED display or TV.<br>Stay in the game flow.</p>
       </div>
-      <a href="https://play.google.com/store/apps/details?id=dev2an.inflictionpoint" class="cta-button" target="_blank" rel="noopener">Get it on Google Play</a>
+      <a href="https://play.google.com/store/apps/details?id=dev2an.inflictionpoint" class="cta-button" target="_blank" rel="noopener" data-i18n="hero.cta">Get it on Google Play</a>
     </div>
   </section>
 
@@ -69,49 +73,49 @@
   <section id="features" class="features">
     <div class="container">
       <div class="section-header">
-        <h2>Everything you need on court</h2>
-        <p>Score, announce, display, and track — without interrupting the game.</p>
+        <h2 data-i18n="features.heading">Everything you need on court</h2>
+        <p data-i18n="features.sub">Score, announce, display, and track — without interrupting the game.</p>
       </div>
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">touch_app</span></div>
-          <h3>Tap to Score</h3>
-          <p>Full-screen split layout. Tap your team's half to award a point. Blue vs orange — impossible to miss. Made a mistake? Undo it.</p>
+          <h3 data-i18n="feat.tap.title">Tap to Score</h3>
+          <p data-i18n="feat.tap.body">Full-screen split layout. Tap your team's half to award a point. Blue vs orange — impossible to miss. Made a mistake? Undo it.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">bluetooth_searching</span></div>
-          <h3>Hands-Free Scoring</h3>
-          <p>Pair a Bluetooth shutter remote or up to 2 Flic buttons. Score, undo, call faults, and switch serve without touching the phone. Auto change ends swaps court sides at the right moment.</p>
+          <h3 data-i18n="feat.handsfree.title">Hands-Free Scoring</h3>
+          <p data-i18n="feat.handsfree.body">Pair a Bluetooth shutter remote or up to 2 Flic buttons. Score, undo, call faults, and switch serve without touching the phone. Auto change ends swaps court sides at the right moment.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">campaign</span></div>
-          <h3>Your Personal Courtside Umpire</h3>
-          <p>TTS announces every point, game, set, and match. Call faults, lets, and outs from the Say panel. English, German, and Indonesian — configurable language, voice, and speed. 4 custom sound slots with file picker and in-app recorder.</p>
+          <h3 data-i18n="feat.umpire.title">Your Personal Courtside Umpire</h3>
+          <p data-i18n="feat.umpire.body">TTS announces every point, game, set, and match. Call faults, lets, and outs from the Say panel. English, German, and Indonesian — configurable language, voice, and speed. 4 custom sound slots with file picker and in-app recorder.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">group</span></div>
-          <h3>Put Names to the Game</h3>
-          <p>Assign players to each team before every match. Persistent directory with recency and frequency suggestions. Player names appear on the scoreboard, in announcements, and on displays.</p>
+          <h3 data-i18n="feat.players.title">Put Names to the Game</h3>
+          <p data-i18n="feat.players.body">Assign players to each team before every match. Persistent directory with recency and frequency suggestions. Player names appear on the scoreboard, in announcements, and on displays.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">history</span></div>
-          <h3>Match Stats &amp; History</h3>
-          <p>Tap the center overlay for set-by-set scores, serving info, and match duration. Every completed match saved — date-grouped history with full set breakdowns.</p>
+          <h3 data-i18n="feat.stats.title">Match Stats &amp; History</h3>
+          <p data-i18n="feat.stats.body">Tap the center overlay for set-by-set scores, serving info, and match duration. Every completed match saved — date-grouped history with full set breakdowns.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">watch</span></div>
-          <h3>Wear OS Companion</h3>
-          <p>Live scoreboard on your wrist with haptic feedback. Score, undo, switch serve, and reannounce from your watch. Swipe for match stats and the Say page.</p>
+          <h3 data-i18n="feat.wear.title">Wear OS Companion</h3>
+          <p data-i18n="feat.wear.body">Live scoreboard on your wrist with haptic feedback. Score, undo, switch serve, and reannounce from your watch. Swipe for match stats and the Say page.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">cast</span></div>
-          <h3>Cast to the Big Screen</h3>
-          <p>Cast live scores to any Chromecast-enabled TV. VS preview screen before the match starts.</p>
+          <h3 data-i18n="feat.cast.title">Cast to the Big Screen</h3>
+          <p data-i18n="feat.cast.body">Cast live scores to any Chromecast-enabled TV. VS preview screen before the match starts.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon"><span class="material-symbols-outlined">grid_on</span></div>
-          <h3>LED Courtside Display</h3>
-          <p>Connect our BLE LED matrix for live courtside scoring. Team colors on 64×32 RGB displays, serve indicator, score animations, and adjustable brightness. Sides swap on the display when you change ends. Player VS preview before the match. OTA firmware updates from the app.</p>
+          <h3 data-i18n="feat.led.title">LED Courtside Display</h3>
+          <p data-i18n="feat.led.body">Connect our BLE LED matrix for live courtside scoring. Team colors on 64×32 RGB displays, serve indicator, score animations, and adjustable brightness. Sides swap on the display when you change ends. Player VS preview before the match. OTA firmware updates from the app.</p>
         </div>
       </div>
     </div>
@@ -121,42 +125,42 @@
   <section id="formats">
     <div class="container">
       <div class="section-header">
-        <h2>Your Court, Your Rules</h2>
-        <p>From classic tennis scoring to casual point-based games.</p>
+        <h2 data-i18n="formats.heading">Your Court, Your Rules</h2>
+        <p data-i18n="formats.sub">From classic tennis scoring to casual point-based games.</p>
       </div>
       <div class="formats-grid">
         <div class="format-card">
           <div class="format-icon"><span class="material-symbols-outlined">format_list_bulleted</span></div>
-          <h3>Classic</h3>
-          <p>Full padel/tennis scoring with deep configuration.</p>
+          <h3 data-i18n="fmt.classic.title">Classic</h3>
+          <p data-i18n="fmt.classic.sub">Full padel/tennis scoring with deep configuration.</p>
           <ul>
-            <li>Best of 1–5 sets</li>
-            <li>3, 4, 5, or 6 games per set</li>
-            <li>Golden point, advantage, or star point deuce</li>
-            <li>Tiebreak, two-game lead, or no margin</li>
-            <li>Short set and sudden death options</li>
-            <li>Match tiebreak for even best-of sets</li>
+            <li data-i18n="fmt.classic.li1">Best of 1–5 sets</li>
+            <li data-i18n="fmt.classic.li2">3, 4, 5, or 6 games per set</li>
+            <li data-i18n="fmt.classic.li3">Golden point, advantage, or star point deuce</li>
+            <li data-i18n="fmt.classic.li4">Tiebreak, two-game lead, or no margin</li>
+            <li data-i18n="fmt.classic.li5">Short set and sudden death options</li>
+            <li data-i18n="fmt.classic.li6">Match tiebreak for even best-of sets</li>
           </ul>
         </div>
         <div class="format-card">
           <div class="format-icon"><span class="material-symbols-outlined">scoreboard</span></div>
-          <h3>Total Games</h3>
-          <p>Play a fixed number of games. Most wins takes the match.</p>
+          <h3 data-i18n="fmt.totalgames.title">Total Games</h3>
+          <p data-i18n="fmt.totalgames.sub">Play a fixed number of games. Most wins takes the match.</p>
           <ul>
-            <li>3 to 9 games</li>
-            <li>All games are played</li>
-            <li>Even totals can end in a draw</li>
-            <li>Golden point, advantage, or star point per game</li>
+            <li data-i18n="fmt.totalgames.li1">3 to 9 games</li>
+            <li data-i18n="fmt.totalgames.li2">All games are played</li>
+            <li data-i18n="fmt.totalgames.li3">Even totals can end in a draw</li>
+            <li data-i18n="fmt.totalgames.li4">Golden point, advantage, or star point per game</li>
           </ul>
         </div>
         <div class="format-card">
           <div class="format-icon"><span class="material-symbols-outlined">bolt</span></div>
-          <h3>Fixed Point</h3>
-          <p>Americano-style scoring. Each tap is one point — no 15/30/40, just a race to the target.</p>
+          <h3 data-i18n="fmt.fixedpoint.title">Fixed Point</h3>
+          <p data-i18n="fmt.fixedpoint.sub">Americano-style scoring. Each tap is one point — no 15/30/40, just a race to the target.</p>
           <ul>
-            <li>16, 21, 24, or 32 points</li>
-            <li>Configurable serve rotation</li>
-            <li>Tiebreak rules for even totals</li>
+            <li data-i18n="fmt.fixedpoint.li1">16, 21, 24, or 32 points</li>
+            <li data-i18n="fmt.fixedpoint.li2">Configurable serve rotation</li>
+            <li data-i18n="fmt.fixedpoint.li3">Tiebreak rules for even totals</li>
           </ul>
         </div>
       </div>
@@ -167,22 +171,23 @@
   <!-- Download -->
   <section id="download" class="download">
     <div class="container">
-      <a href="https://play.google.com/store/apps/details?id=dev2an.inflictionpoint" class="cta-button" target="_blank" rel="noopener">Get it on Google Play</a>
+      <a href="https://play.google.com/store/apps/details?id=dev2an.inflictionpoint" class="cta-button" target="_blank" rel="noopener" data-i18n="download.cta">Get it on Google Play</a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <span>&copy; 2an.dev. All rights reserved.</span>
+      <span data-i18n="footer.copyright">&copy; 2an.dev. All rights reserved.</span>
       <ul class="footer-links">
-        <li><a href="privacy.html">Privacy Policy</a></li>
-        <li><a href="mailto:infliction-point@2an.dev">Contact</a></li>
-        <li><a href="https://www.instagram.com/inflictionpoint/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Instagram</a></li>
+        <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
+        <li><a href="mailto:infliction-point@2an.dev" data-i18n="footer.contact">Contact</a></li>
+        <li><a href="https://www.instagram.com/inflictionpoint/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg><span data-i18n="footer.instagram">Instagram</span></a></li>
       </ul>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
+  <script src="js/i18n.js"></script>
 </body>
 </html>

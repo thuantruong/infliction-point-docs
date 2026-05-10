@@ -424,3 +424,37 @@ section { padding: 80px 0; }
   .hero h1 { font-size: 2rem; }
   .container { padding: 0 16px; }
 }
+
+/* ── Lang Toggle ── */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--surface-high);
+  border: 1px solid var(--ghost-border);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  border-radius: 18px;
+  padding: 4px 10px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  line-height: 1;
+}
+
+.lang-btn:hover { color: var(--heading-color); }
+
+.lang-btn.active {
+  background: var(--electric-lime);
+  color: #1a1a00;
+}
