@@ -11,6 +11,7 @@ const TRANSLATIONS = {
     'footer.privacy': 'Privacy Policy',
     'footer.contact': 'Contact',
     'footer.instagram': 'Instagram',
+    'footer.whatsapp': 'WhatsApp',
 
     // Hero
     'hero.headline': 'SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span>',
@@ -184,12 +185,13 @@ const TRANSLATIONS = {
     'footer.privacy': 'Kebijakan Privasi',
     'footer.contact': 'Kontak',
     'footer.instagram': 'Instagram',
+    'footer.whatsapp': 'WhatsApp',
 
     // Hero
-    'hero.headline': 'SKOR LEBIH CERDAS.<br><span class="accent">TINGKATKAN PERMAINAN.</span>',
-    'hero.tagline1': 'KETUK',
-    'hero.tagline2': 'SKOR',
-    'hero.tagline3': 'MAIN',
+    'hero.headline': 'SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span>',
+    'hero.tagline1': 'TAP',
+    'hero.tagline2': 'SCORE',
+    'hero.tagline3': 'PLAY',
     'hero.body': 'Ketuk dengan ponsel, jam tangan, atau remote.<br>Lihat skor di layar LED atau TV.<br>Tetap fokus dalam permainan.',
     'hero.cta': 'Unduh di Google Play',
 
