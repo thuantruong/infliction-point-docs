@@ -94,10 +94,10 @@ const TRANSLATIONS = {
   <li><strong>Star Point</strong> — after two deuces the game becomes sudden death; the next point wins.</li>
 </ul>`,
     'faq.classic.q5': 'What is a tiebreak?',
-    'faq.classic.a5': `<p>When both teams reach a set-score tie (e.g. 5–5 in a 6-game set), a tiebreak is played — first to 7 points, win by 2.</p>
+    'faq.classic.a5': `<p>When both teams reach a set-score tie (e.g. 6–6 in a 6-game set), a tiebreak is played — first to 7 points, win by 2.</p>
 <p>Two optional sub-rules are available when Tiebreak is selected:</p>
 <ul>
-  <li><strong>Short Set</strong> — the tiebreak triggers one game earlier (e.g. 4–4 in a 6-game set), and the winning team takes the set by one game (5–4).</li>
+  <li><strong>Short Set</strong> — the tiebreak triggers one game earlier (e.g. 5–5 in a 6-game set), and the winning team takes the set by one game (6–5).</li>
   <li><strong>Sudden Death</strong> — at 6–6 in the tiebreak, the next point wins instead of requiring a 2-point lead.</li>
 </ul>`,
     'faq.classic.q6': 'What is a Super Tiebreak / Match Tiebreak?',
@@ -268,10 +268,10 @@ const TRANSLATIONS = {
   <li><strong>Star Point</strong> — setelah dua deuce, game menjadi sudden death; poin berikutnya menang.</li>
 </ul>`,
     'faq.classic.q5': 'Apa itu tiebreak?',
-    'faq.classic.a5': `<p>Saat kedua tim mencapai skor set yang sama (misalnya 5–5 dalam set 6 game), tiebreak dimainkan — pertama mencapai 7 poin, menang dengan selisih 2.</p>
+    'faq.classic.a5': `<p>Saat kedua tim mencapai skor set yang sama (misalnya 6–6 dalam set 6 game), tiebreak dimainkan — pertama mencapai 7 poin, menang dengan selisih 2.</p>
 <p>Dua sub-aturan opsional tersedia saat Tiebreak dipilih:</p>
 <ul>
-  <li><strong>Short Set</strong> — tiebreak dimulai satu game lebih awal (misalnya 4–4 dalam set 6 game), dan tim yang menang mengambil set dengan selisih satu game (5–4).</li>
+  <li><strong>Short Set</strong> — tiebreak dimulai satu game lebih awal (misalnya 5–5 dalam set 6 game), dan tim yang menang mengambil set dengan selisih satu game (6–5).</li>
   <li><strong>Sudden Death</strong> — pada skor 6–6 di tiebreak, poin berikutnya menang tanpa memerlukan selisih 2 poin.</li>
 </ul>`,
     'faq.classic.q6': 'Apa itu Super Tiebreak / Match Tiebreak?',
