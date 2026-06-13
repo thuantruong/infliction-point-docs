@@ -42,6 +42,7 @@ const bcColLabelEl = document.getElementById('bc-col-label');
 const bcDurationEl = document.getElementById('bc-duration');
 const bcDurationTextEl = document.getElementById('bc-duration-text');
 const bcSetHeadersEl = document.getElementById('bc-set-headers');
+const bcPointHeaderEl = document.getElementById('bc-point-header');
 const bcSets1El = document.getElementById('bc-sets1');
 const bcSets2El = document.getElementById('bc-sets2');
 const bcNames1El = document.getElementById('bc-names1');
@@ -708,20 +709,28 @@ function renderBroadcastSetCols(state, config, format, sidesSwapped) {
   if (format === 'FIXED_POINT') return;
 
   if (format === 'CLASSIC' && config.bestOfSets > 1) {
-    for (var i = 0; i < config.bestOfSets; i++) {
-      addHeader('S' + (i + 1));
+    var totalCols = Math.max(config.bestOfSets, state.sets.length);
+    for (var i = 0; i < totalCols; i++) {
+      var isMtb = i >= config.bestOfSets;
+      addHeader('Set ' + (i + 1));
       if (i < state.sets.length && state.sets[i].isComplete) {
-        var g1 = state.sets[i].gamesTeam1;
-        var g2 = state.sets[i].gamesTeam2;
         var won1 = state.sets[i].winner === 'TEAM_1';
         var won2 = state.sets[i].winner === 'TEAM_2';
+        var g1, g2;
+        if (isMtb) {
+          g1 = won1 ? 1 : 0;
+          g2 = won2 ? 1 : 0;
+        } else {
+          g1 = state.sets[i].gamesTeam1;
+          g2 = state.sets[i].gamesTeam2;
+        }
         var lw1 = sidesSwapped ? won2 : won1;
         var lw2 = sidesSwapped ? won1 : won2;
         addScore(bcSets1El, sidesSwapped ? g2 : g1, lw1, !lw1);
         addScore(bcSets2El, sidesSwapped ? g1 : g2, lw2, !lw2);
       } else if (i === state.currentSetIndex) {
-        var cg1 = state.sets[i] ? state.sets[i].gamesTeam1 : 0;
-        var cg2 = state.sets[i] ? state.sets[i].gamesTeam2 : 0;
+        var cg1 = isMtb ? 0 : (state.sets[i] ? state.sets[i].gamesTeam1 : 0);
+        var cg2 = isMtb ? 0 : (state.sets[i] ? state.sets[i].gamesTeam2 : 0);
         addScore(bcSets1El, sidesSwapped ? cg2 : cg1, false, false);
         addScore(bcSets2El, sidesSwapped ? cg1 : cg2, false, false);
       } else {
@@ -811,6 +820,7 @@ function renderBroadcastTheme(state) {
 
   // Set columns
   renderBroadcastSetCols(state, config, format, sidesSwapped);
+  bcPointHeaderEl.style.visibility = isOver ? 'hidden' : '';
 
   // Badge
   bcBadgeEl.classList.add('hidden');

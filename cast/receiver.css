@@ -347,9 +347,9 @@ html, body {
   width: 22vw;
   text-align: center;
   font-family: 'Manrope', sans-serif;
-  font-size: 0.95vw;
+  font-size: 1.2vw;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
 }

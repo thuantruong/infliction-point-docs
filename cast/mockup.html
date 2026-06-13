@@ -161,7 +161,7 @@
         <div class="bc-col-header-row">
           <div class="bc-name-header" id="bc-col-label">Quarter-Finals</div>
           <div id="bc-set-headers" class="bc-set-headers"></div>
-          <div class="bc-point-header">POINT</div>
+          <div id="bc-point-header" class="bc-point-header">POINT</div>
         </div>
         <div class="bc-divider"></div>
         <div class="bc-row">
@@ -243,6 +243,7 @@
       <label>Format
         <select id="sel-format">
           <option value="classic3">Classic 3 sets</option>
+          <option value="classic2mtb">Classic 2 sets + Super TB</option>
           <option value="classic1">Classic 1 set</option>
           <option value="total">Total Games</option>
           <option value="fixed">Fixed Point</option>
@@ -326,6 +327,16 @@ var FORMATS = {
     bestOfSets: 3,
     currentSet: 2
   },
+  classic2mtb: {
+    label: 'CLASSIC (2 SETS)',
+    sets: [
+      { g1: 6, g2: 4, winner: 'TEAM_1' },
+      { g1: 3, g2: 6, winner: 'TEAM_2' },
+      { g1: 11, g2: 9, winner: 'TEAM_1', mtb: true }
+    ],
+    bestOfSets: 2,
+    currentSet: 2
+  },
   classic1: {
     label: 'GAMES (5)',
     sets: [{ g1: 3, g2: 2, winner: null }],
@@ -397,14 +408,22 @@ function renderSetCols(fmt, fmtKey, matchWinner) {
 
   if (fmtKey === 'fixed') return;
 
-  if (fmtKey === 'classic3') {
+  if (fmtKey === 'classic3' || fmtKey === 'classic2mtb') {
     fmt.sets.forEach(function(s, i) {
-      hdr('S' + (i + 1));
+      hdr('Set ' + (i + 1));
       var effectiveWinner = s.winner || (matchWinner && i === fmt.currentSet ? matchWinner : null);
       var cls1 = effectiveWinner ? (effectiveWinner === 'TEAM_1' ? 'won' : 'lost') : '';
       var cls2 = effectiveWinner ? (effectiveWinner === 'TEAM_2' ? 'won' : 'lost') : '';
-      score(bcSets1, s.g1, cls1);
-      score(bcSets2, s.g2, cls2);
+      var g1, g2;
+      if (s.mtb) {
+        g1 = s.winner === 'TEAM_1' ? 1 : 0;
+        g2 = s.winner === 'TEAM_2' ? 1 : 0;
+      } else {
+        g1 = s.g1;
+        g2 = s.g2;
+      }
+      score(bcSets1, g1, cls1);
+      score(bcSets2, g2, cls2);
     });
   } else {
     hdr('GAMES');
@@ -592,6 +611,7 @@ function update() {
   // Set columns
   var matchWinner = state === 'won1' ? 'TEAM_1' : state === 'won2' ? 'TEAM_2' : null;
   renderSetCols(fmt, fmtKey, matchWinner);
+  document.getElementById('bc-point-header').style.visibility = matchWinner ? 'hidden' : '';
 
   // Point cells — reset
   bcPointCell1.classList.remove('serving');
