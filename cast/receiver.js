@@ -478,11 +478,11 @@ function renderDefaultTheme(state, sidesSwapped) {
     durationEl.classList.add('hidden');
   }
 
-  renderTeamPanels(state, format, sidesSwapped);
-  renderCenterOverlay(state, config, format, sidesSwapped);
+  renderTeamPanels(state, format, sidesSwapped, isAtDeuce);
+  renderCenterOverlay(state, config, format, sidesSwapped, isAtDeuce);
 }
 
-function renderTeamPanels(state, format, sidesSwapped) {
+function renderTeamPanels(state, format, sidesSwapped, isAtDeuce) {
   var isOver = state.isMatchOver;
   var winner = state.matchWinner;
   var isDraw = isOver && !winner;
@@ -555,7 +555,7 @@ function renderTeamPanels(state, format, sidesSwapped) {
   points2El.textContent = text2;
 }
 
-function renderCenterOverlay(state, config, format, sidesSwapped) {
+function renderCenterOverlay(state, config, format, sidesSwapped, isAtDeuce) {
   dotsRowEl.innerHTML = '';
   scoreRow1El.innerHTML = '';
   scoreRow1El.className = 'score-row';
