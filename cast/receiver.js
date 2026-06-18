@@ -142,6 +142,7 @@ var currentSlideIndex = -1;
 var imageTimer = null;
 var videoPlaying = false;
 var activeImg = null; // which img element is currently visible (A or B)
+var matchOverTimer = null; // pending auto-slideshow after match over
 
 function isVideoSrc(src) {
   return /\.(mp4|webm|ogg)$/i.test(src);
@@ -331,7 +332,37 @@ function showIdle(playlistUrl) {
     });
 }
 
+function clearMatchOverTimer() {
+  if (matchOverTimer) {
+    clearTimeout(matchOverTimer);
+    matchOverTimer = null;
+  }
+}
+
+// After a match is over (winner / trophy shown), optionally switch to the slideshow
+// after a delay defined in playlist.json ("matchOverDelayMinutes"). Re-invoked on each
+// over-state so user interaction (sides swap, etc.) restarts the countdown.
+function scheduleMatchOverSlideshow(state) {
+  clearMatchOverTimer();
+  if (!state || !state.isMatchOver || !state.matchWinner) return;
+  if (!currentPlaylistUrl) return;
+  var url = currentPlaylistUrl;
+  fetch(url + 'playlist.json')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      var minutes = data && Number(data.matchOverDelayMinutes);
+      if (!(minutes > 0)) return;
+      clearMatchOverTimer();
+      matchOverTimer = setTimeout(function() {
+        matchOverTimer = null;
+        showIdle(url);
+      }, minutes * 60000);
+    })
+    .catch(function() {});
+}
+
 function showScoreboard() {
+  clearMatchOverTimer();
   stopSlideshow();
   idleEl.classList.add('hidden');
   vsScreenEl.classList.add('hidden');
@@ -929,12 +960,21 @@ castContext.addCustomMessageListener(NAMESPACE, function(event) {
 
   switch (message.type) {
     case 'match_state':
-      if (message.state) renderMatchState(message.state, !!message.sidesSwapped);
+      if (message.state) {
+        renderMatchState(message.state, !!message.sidesSwapped);
+        if (message.state.isMatchOver && message.state.matchWinner) {
+          scheduleMatchOverSlideshow(message.state);
+        } else {
+          clearMatchOverTimer();
+        }
+      }
       break;
     case 'vs_preview':
+      clearMatchOverTimer();
       if (message.team1 && message.team2) showVsPreview(message.team1, message.team2);
       break;
     case 'idle':
+      clearMatchOverTimer();
       showIdle(message.playlistUrl);
       break;
   }

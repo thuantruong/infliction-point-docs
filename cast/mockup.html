@@ -39,7 +39,7 @@
       justify-content: space-between;
       gap: 0.8rem;
     }
-    #controls-panel select, #controls-panel input[type=range], #controls-panel input[type=text] {
+    #controls-panel select, #controls-panel input[type=range], #controls-panel input[type=text], #controls-panel input[type=number] {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 0.3rem;
@@ -48,11 +48,36 @@
       font-size: 0.75rem;
       cursor: pointer;
     }
-    #controls-panel input[type=text] {
+    #controls-panel input[type=text], #controls-panel input[type=number] {
       width: 11rem;
       cursor: text;
     }
     #controls-panel input[type=checkbox] { cursor: pointer; }
+    .slide-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-bottom: 0.3rem;
+    }
+    .slide-row input.slide-src { flex: 1; width: auto; }
+    .slide-row input.slide-dur { width: 3.5rem; }
+    .slide-row button {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.3rem;
+      color: #fff;
+      cursor: pointer;
+      padding: 0.2rem 0.45rem;
+    }
+    #btn-add-slide {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.3rem;
+      color: #fff;
+      cursor: pointer;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.75rem;
+    }
     .ctrl-sep {
       height: 1px;
       background: rgba(255,255,255,0.1);
@@ -300,6 +325,17 @@
       <label>Accent color
         <input type="text" id="inp-accent-color" placeholder="#D5FB28">
       </label>
+      <label>Slideshow bg
+        <input type="text" id="inp-slide-bg" placeholder="black">
+      </label>
+      <div class="ctrl-sep"></div>
+      <label>Slideshow after match (min)
+        <input type="number" id="inp-match-delay" min="0" placeholder="0">
+      </label>
+      <div class="ctrl-sep"></div>
+      <label>Slides</label>
+      <div id="slides-editor"></div>
+      <button id="btn-add-slide" type="button">Add slide</button>
       <div class="ctrl-sep"></div>
       <button id="btn-export">Export playlist.json</button>
     </div>
@@ -696,6 +732,34 @@ function update() {
 
 update();
 
+// --- Slides editor ---
+var slidesEditorEl = document.getElementById('slides-editor');
+function addSlideRow(src, duration) {
+  var row = document.createElement('div');
+  row.className = 'slide-row';
+  var srcInput = document.createElement('input');
+  srcInput.type = 'text';
+  srcInput.className = 'slide-src';
+  srcInput.placeholder = 'image.jpg or https://…';
+  if (src) srcInput.value = src;
+  var durInput = document.createElement('input');
+  durInput.type = 'number';
+  durInput.className = 'slide-dur';
+  durInput.min = '1';
+  durInput.placeholder = 'sec';
+  if (duration != null) durInput.value = duration;
+  var removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.textContent = '✕';
+  removeBtn.addEventListener('click', function() { row.remove(); });
+  row.appendChild(srcInput);
+  row.appendChild(durInput);
+  row.appendChild(removeBtn);
+  slidesEditorEl.appendChild(row);
+}
+document.getElementById('btn-add-slide').addEventListener('click', function() { addSlideRow(); });
+addSlideRow();
+
 document.getElementById('btn-export').addEventListener('click', function() {
   var data = {
     theme: document.getElementById('sel-theme').value
@@ -705,6 +769,8 @@ document.getElementById('btn-export').addEventListener('click', function() {
   var sbColor = document.getElementById('inp-sb-color').value.trim();
   var textColor = document.getElementById('inp-text-color').value.trim();
   var accentColor = document.getElementById('inp-accent-color').value.trim();
+  var slideBg = document.getElementById('inp-slide-bg').value.trim();
+  var matchDelay = Number(document.getElementById('inp-match-delay').value);
   var title = document.getElementById('inp-title').value.trim();
   var subtitle = document.getElementById('inp-subtitle').value.trim();
   if (bgUrl) data.backgroundImage = bgUrl;
@@ -712,8 +778,20 @@ document.getElementById('btn-export').addEventListener('click', function() {
   if (sbColor) data.scoreboardBackground = sbColor;
   if (textColor) data.textColor = textColor;
   if (accentColor) data.textColorAccent = accentColor;
+  if (slideBg) data.backgroundColor = slideBg;
+  if (matchDelay > 0) data.matchOverDelayMinutes = matchDelay;
   if (title) data.title = title;
   if (subtitle) data.subtitle = subtitle;
+  var slides = [];
+  slidesEditorEl.querySelectorAll('.slide-row').forEach(function(row) {
+    var src = row.querySelector('.slide-src').value.trim();
+    if (!src) return;
+    var slide = { src: src };
+    var dur = Number(row.querySelector('.slide-dur').value);
+    if (dur > 0) slide.duration = dur;
+    slides.push(slide);
+  });
+  if (slides.length) data.slides = slides;
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
