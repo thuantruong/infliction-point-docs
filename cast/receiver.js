@@ -33,6 +33,14 @@ const vsNames2BroadcastEl = document.getElementById('vs-names2-broadcast');
 const vsBcHeaderEl = document.getElementById('vs-bc-header');
 const vsBcTitleEl = document.getElementById('vs-bc-title');
 const vsBcSubtitleEl = document.getElementById('vs-bc-subtitle');
+const vsCenterAdEl = document.querySelector('.vs-center-ad');
+const vsAdAEl = document.getElementById('vs-ad-a');
+const vsAdBEl = document.getElementById('vs-ad-b');
+const vsBcAdEl = document.querySelector('.vs-bc-ad');
+const vsBcAdAEl = document.getElementById('vs-ad-bc-a');
+const vsBcAdBEl = document.getElementById('vs-ad-bc-b');
+const vsCountdownEl = document.getElementById('vs-countdown');
+const vsCountdownTimeEl = document.getElementById('vs-countdown-time');
 
 // Broadcast theme elements
 const scoreboardBroadcastEl = document.getElementById('scoreboard-broadcast');
@@ -143,6 +151,15 @@ var imageTimer = null;
 var videoPlaying = false;
 var activeImg = null; // which img element is currently visible (A or B)
 var matchOverTimer = null; // pending auto-slideshow after match over
+
+// --- VS-screen ad slideshow + countdown state (independent of the fullscreen idle slideshow) ---
+var vsAdTimer = null;
+var vsAdSlides = null;       // image-only subset of playlist slides
+var vsAdIndex = -1;
+var vsAdActiveImg = null;    // which vs-ad img (A or B) is currently visible
+var vsAdImgEls = null;       // active [imgA, imgB] pair for the current theme
+var vsCountdownInterval = null;
+var vsCountdownEndTs = null;  // target end time; persists across vs_preview re-sends (e.g. side swaps)
 
 function isVideoSrc(src) {
   return /\.(mp4|webm|ogg)$/i.test(src);
@@ -291,6 +308,8 @@ playerManager.addEventListener(cast.framework.events.EventType.MEDIA_FINISHED, f
 
 function showIdle(playlistUrl) {
   stopSlideshow();
+  stopVsAdSlideshow();
+  stopVsCountdown();
   if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
   scoreboardEl.classList.add('hidden');
   scoreboardBroadcastEl.classList.add('hidden');
@@ -318,6 +337,9 @@ function showIdle(playlistUrl) {
         textColorAccent: data.textColorAccent || null,
         title: data.title || null,
         subtitle: data.subtitle || null,
+        slides: (data.slides && data.slides.length) ? data.slides : null,
+        vsCountdownMinutes: Number(data.vsCountdownMinutes) || 0,
+        backgroundColor: data.backgroundColor || 'black',
       };
       themeBaseUrl = baseUrl;
       if (data && data.slides && data.slides.length > 0) {
@@ -364,6 +386,8 @@ function scheduleMatchOverSlideshow(state) {
 function showScoreboard() {
   clearMatchOverTimer();
   stopSlideshow();
+  stopVsAdSlideshow();
+  stopVsCountdown();
   idleEl.classList.add('hidden');
   vsScreenEl.classList.add('hidden');
   var isBroadcast = themeConfig && themeConfig.theme === 'broadcast';
@@ -405,17 +429,140 @@ function teamDisplayName(players, fallback) {
   return fallback;
 }
 
+// --- VS ad slideshow: rotate playlist image slides in the VS center slot ---
+// Images only — the cast-media-player used for video slides is a fullscreen singleton
+// that can't be embedded mid-VS, so video slides are skipped.
+
+function stopVsAdSlideshow() {
+  if (vsAdTimer) { clearTimeout(vsAdTimer); vsAdTimer = null; }
+  vsAdSlides = null;
+  vsAdIndex = -1;
+  vsAdActiveImg = null;
+  vsAdImgEls = null;
+  [vsAdAEl, vsAdBEl, vsBcAdAEl, vsBcAdBEl].forEach(function(img) {
+    if (img) { img.classList.remove('visible'); img.removeAttribute('src'); }
+  });
+  if (vsCenterAdEl) vsCenterAdEl.classList.add('hidden');
+  if (vsBcAdEl) vsBcAdEl.classList.add('hidden');
+  if (vsDefaultLayoutEl) vsDefaultLayoutEl.classList.remove('with-ad', 'bc-rails');
+  if (vsBroadcastLayoutEl) vsBroadcastLayoutEl.classList.remove('with-ad');
+}
+
+function startVsAdSlideshow(isBroadcast) {
+  stopVsAdSlideshow();
+  // Layout switches to ad mode (side rails / shrunk card) even if no images yet.
+  (isBroadcast ? vsBroadcastLayoutEl : vsDefaultLayoutEl).classList.add('with-ad');
+  if (!themeConfig || !themeConfig.slides || !themeConfig.slides.length) return;
+  var images = themeConfig.slides.filter(function(s) { return s && s.src && !isVideoSrc(s.src); });
+  var skipped = themeConfig.slides.length - images.length;
+  if (skipped > 0) {
+    console.log('[VS ad] skipping ' + skipped + ' video slide(s) — images only');
+  }
+  if (!images.length) return; // nothing to show; keep the "VS" badge fallback
+  vsAdImgEls = isBroadcast ? [vsBcAdAEl, vsBcAdBEl] : [vsAdAEl, vsAdBEl];
+  var container = isBroadcast ? vsBcAdEl : vsCenterAdEl;
+  if (!container || !vsAdImgEls[0] || !vsAdImgEls[1]) return;
+  vsAdSlides = images;
+  vsAdIndex = -1;
+  container.classList.remove('hidden');
+  showNextVsAdSlide();
+}
+
+function showNextVsAdSlide() {
+  if (!vsAdSlides || !vsAdSlides.length || !vsAdImgEls) return;
+  vsAdIndex = (vsAdIndex + 1) % vsAdSlides.length;
+  var slide = vsAdSlides[vsAdIndex];
+  var src = /^https?:\/\//i.test(slide.src) ? slide.src : themeBaseUrl + slide.src;
+  var duration = slide.duration || 10;
+
+  var nextImg = (vsAdActiveImg === vsAdImgEls[0]) ? vsAdImgEls[1] : vsAdImgEls[0];
+  var prevImg = vsAdActiveImg;
+
+  var preload = new Image();
+  preload.onload = function() {
+    if (!vsAdSlides) return;
+    nextImg.src = src;
+    requestAnimationFrame(function() {
+      nextImg.style.zIndex = '2';
+      nextImg.classList.add('visible');
+      if (prevImg) {
+        prevImg.style.zIndex = '1';
+        prevImg.classList.remove('visible');
+      }
+      vsAdActiveImg = nextImg;
+    });
+  };
+  preload.onerror = function() {
+    if (vsAdSlides) vsAdTimer = setTimeout(showNextVsAdSlide, 1000);
+  };
+  preload.src = src;
+
+  if (vsAdSlides.length > 1) {
+    if (vsAdTimer) clearTimeout(vsAdTimer);
+    vsAdTimer = setTimeout(function() {
+      if (vsAdSlides) showNextVsAdSlide();
+    }, duration * 1000);
+  }
+}
+
+// --- VS countdown: counts down mm:ss from when the VS screen appears, freezes at 00:00 ---
+
+function stopVsCountdown() {
+  if (vsCountdownInterval) { clearInterval(vsCountdownInterval); vsCountdownInterval = null; }
+  vsCountdownEndTs = null;
+  vsCountdownEl.classList.add('hidden');
+  vsCountdownTimeEl.classList.remove('expired');
+}
+
+function startVsCountdown(minutes) {
+  if (!(minutes > 0)) { stopVsCountdown(); return; }
+  // Already counting (or already expired) this VS session — keep ticking, don't restart.
+  // This survives vs_preview re-sends from the phone (side swaps, name edits).
+  if (vsCountdownEndTs !== null) {
+    vsCountdownEl.classList.remove('hidden');
+    return;
+  }
+  var endTs = Date.now() + minutes * 60000;
+  vsCountdownEndTs = endTs;
+  vsCountdownEl.classList.remove('hidden');
+  vsCountdownTimeEl.classList.remove('expired');
+  function tick() {
+    var remaining = endTs - Date.now();
+    if (remaining <= 0) {
+      vsCountdownTimeEl.textContent = '00:00';
+      vsCountdownTimeEl.classList.add('expired');
+      if (vsCountdownInterval) { clearInterval(vsCountdownInterval); vsCountdownInterval = null; }
+      return;
+    }
+    var totalSec = Math.floor(remaining / 1000);
+    var m = Math.floor(totalSec / 60);
+    var s = totalSec % 60;
+    var mm = m < 10 ? '0' + m : '' + m;
+    var ss = s < 10 ? '0' + s : '' + s;
+    vsCountdownTimeEl.textContent = mm + ':' + ss;
+  }
+  tick();
+  vsCountdownInterval = setInterval(tick, 1000);
+}
+
 function showVsPreview(team1Names, team2Names) {
   stopSlideshow();
+  stopVsAdSlideshow();
+  // Note: countdown is NOT stopped here — it persists across vs_preview re-sends
+  // (side swaps / name edits) and is only reset when leaving the VS screen.
   if (durationInterval) { clearInterval(durationInterval); durationInterval = null; }
   idleEl.classList.add('hidden');
   scoreboardEl.classList.add('hidden');
   scoreboardBroadcastEl.classList.add('hidden');
   vsScreenEl.classList.remove('hidden');
 
-  var isBroadcast = themeConfig && themeConfig.theme === 'broadcast';
-  vsDefaultLayoutEl.classList.toggle('hidden', isBroadcast);
-  vsBroadcastLayoutEl.classList.toggle('hidden', !isBroadcast);
+  // Ad mode always uses the split-theme design (side rails + center ad), even for broadcast.
+  var countdownMinutes = themeConfig ? themeConfig.vsCountdownMinutes : 0;
+  var adMode = countdownMinutes > 0;
+  var isBroadcastTheme = themeConfig && themeConfig.theme === 'broadcast';
+  var useBroadcast = isBroadcastTheme && !adMode;
+  vsDefaultLayoutEl.classList.toggle('hidden', useBroadcast);
+  vsBroadcastLayoutEl.classList.toggle('hidden', !useBroadcast);
 
   function renderVsNames(el, names, cls) {
     el.innerHTML = '';
@@ -431,7 +578,7 @@ function showVsPreview(team1Names, team2Names) {
   renderVsNames(vsNames1BroadcastEl, team1Names, 'bc-name');
   renderVsNames(vsNames2BroadcastEl, team2Names, 'bc-name');
 
-  if (isBroadcast) {
+  if (useBroadcast) {
     if (themeConfig.title) {
       vsBcTitleEl.textContent = themeConfig.title;
       vsBcSubtitleEl.textContent = themeConfig.subtitle || '';
@@ -451,6 +598,17 @@ function showVsPreview(team1Names, team2Names) {
     applyBroadcastTextColor(vsBroadcastLayoutEl);
     applyBroadcastAccentColor(vsBroadcastLayoutEl);
   }
+
+  // Countdown + ad slot (gated on playlist.json vsCountdownMinutes). Both themes use the
+  // split-theme design: team side rails + center ad slot + bottom countdown bar.
+  if (adMode) {
+    startVsAdSlideshow(false);
+    startVsCountdown(countdownMinutes); // no-op if already running (survives side swaps)
+  } else {
+    stopVsCountdown();
+  }
+  // Broadcast theme: line-beside-name rails instead of solid team-color fill.
+  vsDefaultLayoutEl.classList.toggle('bc-rails', adMode && isBroadcastTheme);
 }
 
 function renderMatchState(state, sidesSwapped) {

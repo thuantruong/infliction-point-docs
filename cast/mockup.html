@@ -279,6 +279,10 @@
       <div class="vs-center-default">
         <span class="vs-label-default">VS</span>
       </div>
+      <div class="vs-center-ad hidden">
+        <img id="vs-ad-a" class="vs-ad-img">
+        <img id="vs-ad-b" class="vs-ad-img">
+      </div>
       <div class="vs-panel vs-panel-team2">
         <div id="vs-names2-default" class="vs-names"></div>
       </div>
@@ -287,6 +291,10 @@
       <div class="bc-bg-image"></div>
       <div class="bc-bg-overlay"></div>
       <div class="vs-bc-outer">
+        <div class="vs-bc-ad hidden">
+          <img id="vs-ad-bc-a" class="vs-ad-img">
+          <img id="vs-ad-bc-b" class="vs-ad-img">
+        </div>
         <div id="vs-bc-header" class="bc-header hidden">
           <span id="vs-bc-title" class="bc-title"></span>
           <span id="vs-bc-subtitle" class="vs-bc-subtitle"></span>
@@ -303,6 +311,10 @@
           </div>
         </div>
       </div>
+    </div>
+    <div id="vs-countdown" class="vs-countdown hidden">
+      <span class="vs-countdown-label">STARTS IN</span>
+      <span id="vs-countdown-time" class="vs-countdown-time">--:--</span>
     </div>
   </div>
 
@@ -382,6 +394,9 @@
       <div class="ctrl-sep"></div>
       <label>Slideshow after match (min)
         <input type="number" id="inp-match-delay" min="0" placeholder="0">
+      </label>
+      <label>VS countdown (min)
+        <input type="number" id="inp-vs-countdown" min="0" step="0.5" placeholder="0">
       </label>
       <div class="ctrl-sep"></div>
       <label>Slides</label>
@@ -546,6 +561,7 @@ function update() {
   var sbColorVal = document.getElementById('inp-sb-color').value.trim();
   var textColorVal = document.getElementById('inp-text-color').value.trim();
   var accentColorVal = document.getElementById('inp-accent-color').value.trim();
+  stopVsSim();
   var fmt = FORMATS[fmtKey];
 
   var scoreboardDefault = document.getElementById('scoreboard');
@@ -559,7 +575,9 @@ function update() {
     scoreboardDefault.classList.add('hidden');
     bcBroadcast.classList.add('hidden');
     vsScreen.classList.remove('hidden');
-    var isBc = theme === 'broadcast';
+    // Ad mode always uses the split-theme design (side rails + center ad), even for broadcast.
+    var adMode = Number(document.getElementById('inp-vs-countdown').value) > 0;
+    var isBc = (theme === 'broadcast') && !adMode;
     vsDefaultLayout.classList.toggle('hidden', isBc);
     vsBroadcastLayout.classList.toggle('hidden', !isBc);
     function renderVsNames(el, names, cls) {
@@ -601,6 +619,9 @@ function update() {
         vsBcHeader.classList.add('hidden');
       }
     }
+    startVsSim(false);
+    // Broadcast theme: line-beside-name rails instead of solid team-color fill.
+    vsDefaultLayout.classList.toggle('bc-rails', adMode && theme === 'broadcast');
     return;
   }
 
@@ -782,7 +803,7 @@ function update() {
   document.getElementById(id).addEventListener('input', update);
 });
 
-update();
+// Initial render happens after settings + slides editor are restored (see loadSettings() below).
 
 // --- Slides editor ---
 var slidesEditorEl = document.getElementById('slides-editor');
@@ -803,14 +824,15 @@ function addSlideRow(src, duration) {
   var removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.textContent = '✕';
-  removeBtn.addEventListener('click', function() { row.remove(); });
+  removeBtn.addEventListener('click', function() { row.remove(); saveSettings(); });
+  srcInput.addEventListener('input', saveSettings);
+  durInput.addEventListener('input', saveSettings);
   row.appendChild(srcInput);
   row.appendChild(durInput);
   row.appendChild(removeBtn);
   slidesEditorEl.appendChild(row);
 }
-document.getElementById('btn-add-slide').addEventListener('click', function() { addSlideRow(); });
-addSlideRow();
+document.getElementById('btn-add-slide').addEventListener('click', function() { addSlideRow(); saveSettings(); });
 
 // --- Slideshow preview (self-contained; mirrors receiver.js) ---
 var previewEl = document.getElementById('slideshow-preview');
@@ -909,6 +931,93 @@ function startPreview() {
 document.getElementById('btn-preview').addEventListener('click', startPreview);
 previewEl.addEventListener('click', stopPreview);
 
+// --- VS countdown + center ad simulation (mirrors receiver.js) ---
+var vsSimAdTimer = null;
+var vsSimAdSlides = null;
+var vsSimAdIndex = -1;
+var vsSimAdActive = null;
+var vsSimAdImgEls = null;   // active [imgA, imgB] pair for the current theme
+var vsSimCountdownInt = null;
+
+function stopVsSim() {
+  if (vsSimAdTimer) { clearTimeout(vsSimAdTimer); vsSimAdTimer = null; }
+  if (vsSimCountdownInt) { clearInterval(vsSimCountdownInt); vsSimCountdownInt = null; }
+  vsSimAdSlides = null; vsSimAdIndex = -1; vsSimAdActive = null; vsSimAdImgEls = null;
+  ['vs-ad-a','vs-ad-b','vs-ad-bc-a','vs-ad-bc-b'].forEach(function(id) {
+    var img = document.getElementById(id);
+    if (img) { img.classList.remove('visible'); img.removeAttribute('src'); }
+  });
+  var ad = document.querySelector('.vs-center-ad'); if (ad) ad.classList.add('hidden');
+  var bcAd = document.querySelector('.vs-bc-ad'); if (bcAd) bcAd.classList.add('hidden');
+  var cd = document.getElementById('vs-countdown'); if (cd) cd.classList.add('hidden');
+  var cdTime = document.getElementById('vs-countdown-time'); if (cdTime) cdTime.classList.remove('expired');
+  document.getElementById('vs-default-layout').classList.remove('with-ad', 'bc-rails');
+  document.getElementById('vs-broadcast-layout').classList.remove('with-ad');
+}
+
+function vsSimNextSlide() {
+  if (!vsSimAdSlides || !vsSimAdSlides.length || !vsSimAdImgEls) return;
+  vsSimAdIndex = (vsSimAdIndex + 1) % vsSimAdSlides.length;
+  var slide = vsSimAdSlides[vsSimAdIndex];
+  var a = vsSimAdImgEls[0], b = vsSimAdImgEls[1];
+  var nextImg = (vsSimAdActive === a) ? b : a;
+  var prevImg = vsSimAdActive;
+  var preload = new Image();
+  preload.onload = function() {
+    if (!vsSimAdSlides) return;
+    nextImg.src = slide.src;
+    requestAnimationFrame(function() {
+      nextImg.style.zIndex = '2'; nextImg.classList.add('visible');
+      if (prevImg) { prevImg.style.zIndex = '1'; prevImg.classList.remove('visible'); }
+      vsSimAdActive = nextImg;
+    });
+  };
+  preload.onerror = function() { if (vsSimAdSlides) vsSimAdTimer = setTimeout(vsSimNextSlide, 1000); };
+  preload.src = slide.src;
+  if (vsSimAdSlides.length > 1) {
+    if (vsSimAdTimer) clearTimeout(vsSimAdTimer);
+    vsSimAdTimer = setTimeout(function() { if (vsSimAdSlides) vsSimNextSlide(); }, (slide.duration || 10) * 1000);
+  }
+}
+
+function startVsSim(isBc) {
+  var minutes = Number(document.getElementById('inp-vs-countdown').value);
+  if (!(minutes > 0)) return;
+  // Countdown bar (both themes)
+  var cd = document.getElementById('vs-countdown');
+  var cdTime = document.getElementById('vs-countdown-time');
+  cd.classList.remove('hidden');
+  cdTime.classList.remove('expired');
+  var endTs = Date.now() + minutes * 60000;
+  function tick() {
+    var rem = endTs - Date.now();
+    if (rem <= 0) {
+      cdTime.textContent = '00:00';
+      cdTime.classList.add('expired');
+      if (vsSimCountdownInt) { clearInterval(vsSimCountdownInt); vsSimCountdownInt = null; }
+      return;
+    }
+    var t = Math.floor(rem / 1000), m = Math.floor(t / 60), s = t % 60;
+    cdTime.textContent = (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+  tick();
+  vsSimCountdownInt = setInterval(tick, 1000);
+  // Ad slideshow — default: side rails + center slot; broadcast: 16:9 slot above shrunk card.
+  var layout = document.getElementById(isBc ? 'vs-broadcast-layout' : 'vs-default-layout');
+  layout.classList.add('with-ad');
+  var images = collectSlides().filter(function(s) { return !isVideoSrc(s.src); });
+  if (images.length) {
+    vsSimAdImgEls = isBc
+      ? [document.getElementById('vs-ad-bc-a'), document.getElementById('vs-ad-bc-b')]
+      : [document.getElementById('vs-ad-a'), document.getElementById('vs-ad-b')];
+    var container = document.querySelector(isBc ? '.vs-bc-ad' : '.vs-center-ad');
+    vsSimAdSlides = images;
+    vsSimAdIndex = -1;
+    container.classList.remove('hidden');
+    vsSimNextSlide();
+  }
+}
+
 document.getElementById('btn-export').addEventListener('click', function() {
   var data = {
     theme: document.getElementById('sel-theme').value
@@ -920,6 +1029,7 @@ document.getElementById('btn-export').addEventListener('click', function() {
   var accentColor = document.getElementById('inp-accent-color').value.trim();
   var slideBg = document.getElementById('inp-slide-bg').value.trim();
   var matchDelay = Number(document.getElementById('inp-match-delay').value);
+  var vsCountdown = Number(document.getElementById('inp-vs-countdown').value);
   var title = document.getElementById('inp-title').value.trim();
   var subtitle = document.getElementById('inp-subtitle').value.trim();
   if (bgUrl) data.backgroundImage = bgUrl;
@@ -929,6 +1039,7 @@ document.getElementById('btn-export').addEventListener('click', function() {
   if (accentColor) data.textColorAccent = accentColor;
   if (slideBg) data.backgroundColor = slideBg;
   if (matchDelay > 0) data.matchOverDelayMinutes = matchDelay;
+  if (vsCountdown > 0) data.vsCountdownMinutes = vsCountdown;
   if (title) data.title = title;
   if (subtitle) data.subtitle = subtitle;
   var slides = [];
@@ -949,6 +1060,58 @@ document.getElementById('btn-export').addEventListener('click', function() {
   a.click();
   URL.revokeObjectURL(url);
 });
+
+// --- Persistence (survives browser refresh) ---
+var STORAGE_KEY = 'ip-cast-mockup-settings';
+var PERSIST_FIELDS = [
+  'sel-theme','sel-format','sel-serve','sel-point','sel-state',
+  'inp-title','inp-subtitle','inp-bg-url','inp-bg-color','inp-sb-color',
+  'inp-text-color','inp-accent-color','inp-slide-bg','inp-match-delay','inp-vs-countdown'
+];
+
+function saveSettings() {
+  var fields = {};
+  PERSIST_FIELDS.forEach(function(id) { fields[id] = document.getElementById(id).value; });
+  var slides = [];
+  slidesEditorEl.querySelectorAll('.slide-row').forEach(function(row) {
+    slides.push({ src: row.querySelector('.slide-src').value, dur: row.querySelector('.slide-dur').value });
+  });
+  var data = { fields: fields, titleBar: document.getElementById('chk-title').checked, slides: slides };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+function loadSettings() {
+  var data = null;
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) data = JSON.parse(raw);
+  } catch (e) { data = null; }
+
+  if (data && data.fields) {
+    PERSIST_FIELDS.forEach(function(id) {
+      if (data.fields[id] != null) document.getElementById(id).value = data.fields[id];
+    });
+  }
+  if (data && typeof data.titleBar === 'boolean') {
+    document.getElementById('chk-title').checked = data.titleBar;
+  }
+  if (data && data.slides && data.slides.length) {
+    data.slides.forEach(function(s) { addSlideRow(s.src, (s.dur !== '' && s.dur != null) ? s.dur : null); });
+  } else {
+    addSlideRow();
+  }
+}
+
+// Save on any control change (selects, text/number inputs, title checkbox)
+PERSIST_FIELDS.forEach(function(id) {
+  var el = document.getElementById(id);
+  el.addEventListener('input', saveSettings);
+  el.addEventListener('change', saveSettings);
+});
+document.getElementById('chk-title').addEventListener('change', saveSettings);
+
+loadSettings();
+update();
 </script>
 </body>
 </html>

@@ -487,6 +487,7 @@ html, body {
 /* --- VS Preview --- */
 
 #vs-screen {
+  --vs-countdown-h: 16vh;
   width: 100%;
   height: 100%;
   position: relative;
@@ -551,6 +552,149 @@ html, body {
   letter-spacing: 0.05em;
 }
 
+/* Ad-mode: team panels become narrow side rails, center hosts rotating ad slides.
+   Bottom is reserved for the countdown bar (--vs-countdown-h) so nothing overlaps. */
+#vs-default-layout.with-ad {
+  box-sizing: border-box;
+  padding-bottom: var(--vs-countdown-h);
+}
+
+#vs-default-layout.with-ad .vs-panel {
+  flex: 0 0 18vw;
+}
+
+#vs-default-layout.with-ad .vs-name {
+  font-size: 2.4vw;
+  padding: 0 1.2vw;
+}
+
+#vs-default-layout.with-ad .vs-center-default {
+  display: none;
+}
+
+/* Broadcast theme in ad mode: no solid rail fill — a colored line beside the names instead */
+#vs-default-layout.with-ad.bc-rails .vs-panel-team1,
+#vs-default-layout.with-ad.bc-rails .vs-panel-team2 {
+  background: transparent;
+}
+
+#vs-default-layout.with-ad.bc-rails .vs-names {
+  padding: 0 1.4vw;
+}
+
+#vs-default-layout.with-ad.bc-rails .vs-panel-team1 .vs-names {
+  border-right: 0.4vw solid #1565C0;
+}
+
+#vs-default-layout.with-ad.bc-rails .vs-panel-team2 .vs-names {
+  border-left: 0.4vw solid #E65100;
+}
+
+/* Center column: centers a fixed 16:9 ad frame */
+.vs-center-ad {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+  padding: 2vh 1vw;
+}
+
+.vs-ad-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.vs-ad-img.visible {
+  opacity: 1;
+}
+
+/* Broadcast ad slot: fixed 16:9 frame above the team card */
+.vs-bc-ad {
+  flex: none;
+  height: 42vh;
+  width: auto;
+  max-width: 72vw;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+#vs-broadcast-layout.with-ad {
+  box-sizing: border-box;
+  padding-bottom: var(--vs-countdown-h);
+}
+
+#vs-broadcast-layout.with-ad .vs-bc-layout {
+  width: 50vw;
+}
+
+#vs-broadcast-layout.with-ad .vs-bc-team {
+  min-height: 11vh;
+  padding: 1.6vh 2vw;
+}
+
+#vs-broadcast-layout.with-ad .vs-bc-outer {
+  gap: 1.6vh;
+}
+
+/* Countdown bar: full-width strip at the very bottom, fixed height */
+.vs-countdown {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--vs-countdown-h);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4vh;
+  background: rgba(14, 14, 14, 0.95);
+  border-top: 0.2vh solid rgba(213, 251, 40, 0.5);
+}
+
+.vs-countdown-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 2vw;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.vs-countdown-time {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 6vw;
+  font-weight: 700;
+  line-height: 1;
+  color: #D5FB28;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Countdown finished: red + blinking */
+.vs-countdown-time.expired {
+  color: #FF3B30;
+  animation: vs-countdown-blink 1s steps(1, end) infinite;
+}
+
+@keyframes vs-countdown-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
 #vs-broadcast-layout {
   position: relative;
   width: 100%;
@@ -606,6 +750,11 @@ html, body {
   flex-direction: column;
   gap: 0.2vh;
   margin-left: 1.8vw;
+}
+
+/* Broadcast VS card (no ads): larger player names, prominent like the scoreboard */
+.vs-bc-names .bc-name {
+  font-size: 4.4vw;
 }
 
 .vs-bc-vs {
