@@ -109,9 +109,60 @@
       letter-spacing: 0.05em;
       width: 100%;
     }
+    #btn-preview {
+      background: transparent;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 0.4rem;
+      padding: 0.35rem 0.9rem;
+      font-family: 'Manrope', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      width: 100%;
+    }
+    #slideshow-preview {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: black;
+      cursor: pointer;
+    }
+    #slideshow-preview #slide-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: black;
+    }
+    #slideshow-preview-hint {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Manrope', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Slideshow preview overlay -->
+  <div id="slideshow-preview" class="hidden">
+    <div id="slideshow">
+      <img id="slide-img-a" class="slide-img">
+      <img id="slide-img-b" class="slide-img">
+      <video id="slide-video" class="hidden" muted playsinline></video>
+    </div>
+    <div id="slideshow-preview-hint">Click to stop preview</div>
+  </div>
 
   <!-- Default (split-panel) theme -->
   <div id="scoreboard" class="hidden">
@@ -336,6 +387,7 @@
       <label>Slides</label>
       <div id="slides-editor"></div>
       <button id="btn-add-slide" type="button">Add slide</button>
+      <button id="btn-preview" type="button">Preview slideshow</button>
       <div class="ctrl-sep"></div>
       <button id="btn-export">Export playlist.json</button>
     </div>
@@ -759,6 +811,103 @@ function addSlideRow(src, duration) {
 }
 document.getElementById('btn-add-slide').addEventListener('click', function() { addSlideRow(); });
 addSlideRow();
+
+// --- Slideshow preview (self-contained; mirrors receiver.js) ---
+var previewEl = document.getElementById('slideshow-preview');
+var slideshowBgEl = document.getElementById('slideshow');
+var slideImgA = document.getElementById('slide-img-a');
+var slideImgB = document.getElementById('slide-img-b');
+var slideVideoEl = document.getElementById('slide-video');
+var previewSlides = [];
+var previewIndex = -1;
+var previewTimer = null;
+var previewActiveImg = null;
+
+function isVideoSrc(src) {
+  return /\.(mp4|webm|ogg)$/i.test(src);
+}
+
+function collectSlides() {
+  var slides = [];
+  slidesEditorEl.querySelectorAll('.slide-row').forEach(function(row) {
+    var src = row.querySelector('.slide-src').value.trim();
+    if (!src) return;
+    var dur = Number(row.querySelector('.slide-dur').value);
+    slides.push({ src: src, duration: dur > 0 ? dur : 5 });
+  });
+  return slides;
+}
+
+function stopPreview() {
+  if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
+  try { slideVideoEl.pause(); } catch (e) {}
+  slideVideoEl.removeAttribute('src');
+  slideVideoEl.classList.add('hidden');
+  slideImgA.classList.remove('visible'); slideImgA.removeAttribute('src');
+  slideImgB.classList.remove('visible'); slideImgB.removeAttribute('src');
+  previewActiveImg = null;
+  previewIndex = -1;
+  previewEl.classList.add('hidden');
+}
+
+function previewNextSlide() {
+  if (!previewSlides.length) return;
+  previewIndex = (previewIndex + 1) % previewSlides.length;
+  var slide = previewSlides[previewIndex];
+  if (isVideoSrc(slide.src)) {
+    previewShowVideo(slide.src);
+  } else {
+    previewShowImage(slide.src, slide.duration);
+  }
+}
+
+function previewShowImage(src, duration) {
+  try { slideVideoEl.pause(); } catch (e) {}
+  slideVideoEl.classList.add('hidden');
+
+  var nextImg = (previewActiveImg === slideImgA) ? slideImgB : slideImgA;
+  var prevImg = previewActiveImg;
+  var preload = new Image();
+  preload.onload = function() {
+    nextImg.src = src;
+    requestAnimationFrame(function() {
+      nextImg.style.zIndex = '2';
+      nextImg.classList.add('visible');
+      if (prevImg) { prevImg.style.zIndex = '1'; prevImg.classList.remove('visible'); }
+      previewActiveImg = nextImg;
+    });
+  };
+  preload.onerror = function() { previewTimer = setTimeout(previewNextSlide, 1000); };
+  preload.src = src;
+
+  if (previewTimer) clearTimeout(previewTimer);
+  previewTimer = setTimeout(previewNextSlide, duration * 1000);
+}
+
+function previewShowVideo(src) {
+  if (previewTimer) { clearTimeout(previewTimer); previewTimer = null; }
+  slideImgA.classList.remove('visible');
+  slideImgB.classList.remove('visible');
+  slideVideoEl.classList.remove('hidden');
+  slideVideoEl.src = src;
+  slideVideoEl.onended = previewNextSlide;
+  slideVideoEl.onerror = function() { previewTimer = setTimeout(previewNextSlide, 1000); };
+  try { slideVideoEl.play(); } catch (e) {}
+}
+
+function startPreview() {
+  previewSlides = collectSlides();
+  if (!previewSlides.length) { alert('Add at least one slide to preview.'); return; }
+  var bg = document.getElementById('inp-slide-bg').value.trim() || 'black';
+  slideshowBgEl.style.backgroundColor = bg;
+  previewIndex = -1;
+  previewActiveImg = null;
+  previewEl.classList.remove('hidden');
+  previewNextSlide();
+}
+
+document.getElementById('btn-preview').addEventListener('click', startPreview);
+previewEl.addEventListener('click', stopPreview);
 
 document.getElementById('btn-export').addEventListener('click', function() {
   var data = {
