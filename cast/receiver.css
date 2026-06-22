@@ -279,6 +279,7 @@ html, body {
 .bc-duration {
   display: flex;
   align-items: center;
+  margin-left: auto;
   gap: 0.5vw;
   font-family: 'Manrope', sans-serif;
   font-size: 1.2vw;
@@ -579,6 +580,8 @@ html, body {
 }
 
 #vs-default-layout.with-ad.bc-rails .vs-names {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0 1.4vw;
 }
 
