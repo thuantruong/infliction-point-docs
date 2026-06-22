@@ -609,6 +609,19 @@ function showVsPreview(team1Names, team2Names) {
   }
   // Broadcast theme: line-beside-name rails instead of solid team-color fill.
   vsDefaultLayoutEl.classList.toggle('bc-rails', adMode && isBroadcastTheme);
+
+  // Player rails, countdown bar, and ad slot (incl. letterbox) use the slideshow bg color in ad mode.
+  var slideBg = (adMode && themeConfig && themeConfig.backgroundColor) ? themeConfig.backgroundColor : '';
+  vsScreenEl.style.background = slideBg;
+  vsCountdownEl.style.background = slideBg;
+  [vsCenterAdEl, vsBcAdEl, vsAdAEl, vsAdBEl, vsBcAdAEl, vsBcAdBEl].forEach(function(el) {
+    if (el) el.style.background = slideBg;
+  });
+
+  // Countdown text + bar line use the configured accent color.
+  var accent = (adMode && themeConfig && themeConfig.textColorAccent) ? themeConfig.textColorAccent : '';
+  if (accent) vsCountdownEl.style.setProperty('--vs-accent', accent);
+  else vsCountdownEl.style.removeProperty('--vs-accent');
 }
 
 function renderMatchState(state, sidesSwapped) {

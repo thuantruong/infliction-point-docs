@@ -622,6 +622,21 @@ function update() {
     startVsSim(false);
     // Broadcast theme: line-beside-name rails instead of solid team-color fill.
     vsDefaultLayout.classList.toggle('bc-rails', adMode && theme === 'broadcast');
+    // Player rails, countdown bar, and ad slot (incl. letterbox) use the slideshow bg color in ad mode.
+    var slideBg = adMode ? (document.getElementById('inp-slide-bg').value.trim() || 'black') : '';
+    vsScreen.style.background = slideBg;
+    document.getElementById('vs-countdown').style.background = slideBg;
+    ['vs-ad-a','vs-ad-b','vs-ad-bc-a','vs-ad-bc-b'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.style.background = slideBg;
+    });
+    [document.querySelector('.vs-center-ad'), document.querySelector('.vs-bc-ad')].forEach(function(el) {
+      if (el) el.style.background = slideBg;
+    });
+    // Countdown text + bar line use the configured accent color.
+    var cdAccent = adMode ? (document.getElementById('inp-accent-color').value.trim()) : '';
+    var cdEl = document.getElementById('vs-countdown');
+    if (cdAccent) cdEl.style.setProperty('--vs-accent', cdAccent);
+    else cdEl.style.removeProperty('--vs-accent');
     return;
   }
 

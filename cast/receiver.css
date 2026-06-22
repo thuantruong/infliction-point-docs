@@ -487,7 +487,7 @@ html, body {
 /* --- VS Preview --- */
 
 #vs-screen {
-  --vs-countdown-h: 16vh;
+  --vs-countdown-h: 21vh;
   width: 100%;
   height: 100%;
   position: relative;
@@ -651,6 +651,7 @@ html, body {
 
 /* Countdown bar: full-width strip at the very bottom, fixed height */
 .vs-countdown {
+  box-sizing: border-box;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -662,8 +663,9 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 0.4vh;
+  padding: 2.5vh 0 6vh;
   background: rgba(14, 14, 14, 0.95);
-  border-top: 0.2vh solid rgba(213, 251, 40, 0.5);
+  border-top: 0.2vh solid var(--vs-accent, #D5FB28);
 }
 
 .vs-countdown-label {
@@ -680,7 +682,7 @@ html, body {
   font-size: 6vw;
   font-weight: 700;
   line-height: 1;
-  color: #D5FB28;
+  color: var(--vs-accent, #D5FB28);
   font-variant-numeric: tabular-nums;
 }
 
