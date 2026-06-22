@@ -404,6 +404,8 @@
       <button id="btn-add-slide" type="button">Add slide</button>
       <button id="btn-preview" type="button">Preview slideshow</button>
       <div class="ctrl-sep"></div>
+      <button id="btn-import" type="button">Load playlist.json</button>
+      <input type="file" id="inp-import-file" accept="application/json,.json" style="display:none">
       <button id="btn-export">Export playlist.json</button>
     </div>
     <button id="toggle-btn" onclick="document.getElementById('controls-panel').style.display = document.getElementById('controls-panel').style.display === 'none' ? '' : 'none'">Controls</button>
@@ -1074,6 +1076,48 @@ document.getElementById('btn-export').addEventListener('click', function() {
   a.download = 'playlist.json';
   a.click();
   URL.revokeObjectURL(url);
+});
+
+// --- Import: load an existing playlist.json into the controls ---
+function applyPlaylist(data) {
+  function setVal(id, v) { document.getElementById(id).value = (v != null ? v : ''); }
+  setVal('sel-theme', data.theme || 'default');
+  setVal('inp-bg-url', data.backgroundImage);
+  setVal('inp-bg-color', data.backgroundImageColor);
+  setVal('inp-sb-color', data.scoreboardBackground);
+  setVal('inp-text-color', data.textColor);
+  setVal('inp-accent-color', data.textColorAccent);
+  setVal('inp-slide-bg', data.backgroundColor);
+  setVal('inp-match-delay', data.matchOverDelayMinutes);
+  setVal('inp-vs-countdown', data.vsCountdownMinutes);
+  setVal('inp-title', data.title);
+  setVal('inp-subtitle', data.subtitle);
+  document.getElementById('chk-title').checked = !!data.title;
+  slidesEditorEl.innerHTML = '';
+  if (data.slides && data.slides.length) {
+    data.slides.forEach(function(s) { addSlideRow(s.src || '', (s.duration != null ? s.duration : null)); });
+  } else {
+    addSlideRow();
+  }
+  saveSettings();
+  update();
+}
+
+document.getElementById('btn-import').addEventListener('click', function() {
+  document.getElementById('inp-import-file').click();
+});
+document.getElementById('inp-import-file').addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    var data;
+    try { data = JSON.parse(reader.result); }
+    catch (err) { alert('Invalid playlist.json: ' + err.message); return; }
+    applyPlaylist(data);
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // allow re-loading the same file
 });
 
 // --- Persistence (survives browser refresh) ---
