@@ -1,8 +1,8 @@
 {
   "64x32": {
-    "version": "1.1.1-test",
+    "version": "1.1.1-test-b",
     "url": "https://infliction-point.2an.dev/firmware/test/ip-64x32-1.1.1-test.bin",
-    "size": 1168800,
-    "md5": "359ebf07d05a7fc2a22669ad1358af6d"
+    "size": 1168832,
+    "md5": "7cd4f70cf1b48a2151ae6e6e3aafda15"
   }
 }
