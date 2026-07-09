@@ -35,8 +35,8 @@ html, body {
   overflow: hidden;
 }
 
-.team1-bg { background: #1A3A5C; }
-.team2-bg { background: #5C2A0E; }
+.team1-bg { background: #233759; }
+.team2-bg { background: #592A17; }
 
 .score-container {
   display: flex;
@@ -69,8 +69,8 @@ html, body {
   z-index: 2;
 }
 
-.team1-pill { background: rgba(21, 101, 192, 0.25); }
-.team2-pill { background: rgba(230, 81, 0, 0.25); }
+.team1-pill { background: rgba(100, 157, 255, 0.25); }
+.team2-pill { background: rgba(255, 121, 67, 0.25); }
 
 .serve-ball {
   position: absolute;
@@ -166,8 +166,8 @@ html, body {
   background: transparent;
 }
 
-.dot.team1-won { background: #1565C0; border-color: #1565C0; }
-.dot.team2-won { background: #E65100; border-color: #E65100; }
+.dot.team1-won { background: #649DFF; border-color: #649DFF; }
+.dot.team2-won { background: #FF7943; border-color: #FF7943; }
 .dot.current  { background: #D5FB28; border-color: #D5FB28; }
 
 .duration-label {
@@ -375,8 +375,8 @@ html, body {
   margin-right: 1.8vw;
 }
 
-.bc-team-strip.team1 { background: #1565C0; }
-.bc-team-strip.team2 { background: #E65100; }
+.bc-team-strip.team1 { background: #649DFF; }
+.bc-team-strip.team2 { background: #FF7943; }
 
 .bc-names-cell {
   flex: 1;
@@ -508,8 +508,8 @@ html, body {
   justify-content: center;
 }
 
-.vs-panel-team1 { background: #1A3A5C; }
-.vs-panel-team2 { background: #5C2A0E; }
+.vs-panel-team1 { background: #233759; }
+.vs-panel-team2 { background: #592A17; }
 
 .vs-names {
   display: flex;
@@ -586,11 +586,11 @@ html, body {
 }
 
 #vs-default-layout.with-ad.bc-rails .vs-panel-team1 .vs-names {
-  border-right: 0.4vw solid #1565C0;
+  border-right: 0.4vw solid #649DFF;
 }
 
 #vs-default-layout.with-ad.bc-rails .vs-panel-team2 .vs-names {
-  border-left: 0.4vw solid #E65100;
+  border-left: 0.4vw solid #FF7943;
 }
 
 /* Center column: centers a fixed 16:9 ad frame */
