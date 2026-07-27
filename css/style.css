@@ -377,6 +377,11 @@ section { padding: 80px 0; }
 .footer-links a { color: var(--on-surface-variant); }
 .footer-links a:hover { color: var(--heading-color); }
 
+.footer-social {
+  display: inline-flex;
+  gap: 16px;
+}
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   section { padding: 56px 0; }
@@ -423,6 +428,13 @@ section { padding: 80px 0; }
   .footer .container {
     flex-direction: column;
     text-align: center;
+  }
+
+  .footer-links {
+    justify-content: center;
+    flex-wrap: wrap;
+    row-gap: 12px;
+    column-gap: 16px;
   }
 }
 
