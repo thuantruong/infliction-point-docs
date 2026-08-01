@@ -422,7 +422,9 @@ function formatDuration(ms) {
   return h + ':' + mm;
 }
 
-function teamDisplayName(players, fallback) {
+function teamDisplayName(name, players, fallback) {
+  // Custom team name (fixed-partner formats) wins; else joined player names; else fallback.
+  if (name && name.trim()) return name;
   if (players && players.length > 0) {
     return players.map(function(p) { return p.name; }).join(' / ');
   }
@@ -643,8 +645,8 @@ function renderDefaultTheme(state, sidesSwapped) {
   // Swap panel backgrounds and labels
   var team1Panel = document.getElementById('team1');
   var team2Panel = document.getElementById('team2');
-  var t1Name = teamDisplayName(config.team1Players, 'TEAM 1');
-  var t2Name = teamDisplayName(config.team2Players, 'TEAM 2');
+  var t1Name = teamDisplayName(config.team1Name, config.team1Players, 'TEAM 1');
+  var t2Name = teamDisplayName(config.team2Name, config.team2Players, 'TEAM 2');
   if (sidesSwapped) {
     team1Panel.className = 'team-panel team2-bg';
     team2Panel.className = 'team-panel team1-bg';
@@ -1013,8 +1015,8 @@ function renderBroadcastTheme(state) {
   }
 
   // Names + team color strips
-  var t1Name = teamDisplayName(config.team1Players, 'TEAM 1');
-  var t2Name = teamDisplayName(config.team2Players, 'TEAM 2');
+  var t1Name = teamDisplayName(config.team1Name, config.team1Players, 'TEAM 1');
+  var t2Name = teamDisplayName(config.team2Name, config.team2Players, 'TEAM 2');
   renderBroadcastNames(bcNames1El, sidesSwapped ? t2Name : t1Name);
   renderBroadcastNames(bcNames2El, sidesSwapped ? t1Name : t2Name);
   bcStrip1El.className = 'bc-team-strip ' + (sidesSwapped ? 'team2' : 'team1');
