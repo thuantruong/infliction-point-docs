@@ -14,6 +14,18 @@ const TRANSLATIONS = {
     'footer.instagram': 'Instagram',
     'footer.whatsapp': 'WhatsApp',
 
+    // Delete Account
+    'delacc.title': 'Delete Your Account',
+    'delacc.updated': 'Last updated: August 2, 2026',
+    'delacc.h.inapp': 'Delete From the App',
+    'delacc.p.inapp': 'If you have the Infliction Point app installed and can sign in, open the app and go to Settings → Delete Account. This permanently removes your account from Firebase Authentication and erases your profile, including your profile photo, from our database. This action cannot be undone.',
+    'delacc.h.data': 'What Gets Deleted',
+    'delacc.p.data': 'Deleting your account removes your Firebase Authentication record and your profile data (name, username, gender, bio, and profile photo). Records of tournaments you took part in may be retained so other participants\' results and history stay intact, but your name is anonymized on those records once your account is deleted. Match history and player directory data saved locally on your device are not affected by account deletion and can be cleared separately from within the app.',
+    'delacc.h.noaccess': "Can't Access the App?",
+    'delacc.p.noaccess': 'If you\'ve uninstalled the app or lost access to your account, email us at <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a> from the address associated with your account and request deletion. We\'ll verify your request and delete your account and profile data within 30 days.',
+    'delacc.h.contact': 'Contact',
+    'delacc.p.contact': 'If you have questions about deleting your account, contact us at <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a>. See our <a href="privacy.html">Privacy Policy</a> for more on how your data is handled.',
+
     // Hero
     'hero.headline': 'SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span>',
     'hero.tagline1': 'TAP',
@@ -233,6 +245,18 @@ const TRANSLATIONS = {
     'footer.contact': 'Kontak',
     'footer.instagram': 'Instagram',
     'footer.whatsapp': 'WhatsApp',
+
+    // Delete Account
+    'delacc.title': 'Hapus Akun Anda',
+    'delacc.updated': 'Terakhir diperbarui: 2 Agustus 2026',
+    'delacc.h.inapp': 'Hapus Melalui Aplikasi',
+    'delacc.p.inapp': 'Jika Anda memiliki aplikasi Infliction Point terpasang dan dapat masuk, buka aplikasi lalu buka Setelan → Hapus Akun. Ini akan menghapus akun Anda secara permanen dari Firebase Authentication dan menghapus profil Anda, termasuk foto profil, dari database kami. Tindakan ini tidak dapat dibatalkan.',
+    'delacc.h.data': 'Apa yang Dihapus',
+    'delacc.p.data': 'Menghapus akun Anda akan menghapus catatan Firebase Authentication dan data profil Anda (nama, username, gender, bio, dan foto profil). Catatan turnamen yang pernah Anda ikuti mungkin tetap disimpan agar hasil dan riwayat peserta lain tetap utuh, tetapi nama Anda dianonimkan pada catatan tersebut setelah akun dihapus. Riwayat pertandingan dan direktori pemain yang tersimpan secara lokal di perangkat Anda tidak terpengaruh oleh penghapusan akun dan dapat dihapus secara terpisah dari dalam aplikasi.',
+    'delacc.h.noaccess': 'Tidak Bisa Mengakses Aplikasi?',
+    'delacc.p.noaccess': 'Jika Anda sudah mencopot pemasangan aplikasi atau kehilangan akses ke akun Anda, kirim email ke <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a> dari alamat yang terhubung dengan akun Anda dan minta penghapusan. Kami akan memverifikasi permintaan Anda dan menghapus akun serta data profil Anda dalam waktu 30 hari.',
+    'delacc.h.contact': 'Kontak',
+    'delacc.p.contact': 'Jika Anda memiliki pertanyaan tentang penghapusan akun, hubungi kami di <a href="mailto:infliction-point@2an.dev">infliction-point@2an.dev</a>. Lihat <a href="privacy.html">Kebijakan Privasi</a> kami untuk info lebih lanjut tentang bagaimana data Anda ditangani.',
 
     // Hero
     'hero.headline': 'SCORE SMARTER.<br><span class="accent">ELEVATE THE GAME.</span>',
