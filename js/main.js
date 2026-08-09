@@ -16,3 +16,18 @@ document.querySelectorAll('.nav-links a').forEach(link => {
     hamburger.setAttribute('aria-expanded', 'false');
   });
 });
+
+// Show only the download CTA matching the visitor's platform
+function detectPlatform() {
+  const ua = navigator.userAgent;
+  if (/Android/.test(ua)) return 'android';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) return 'ios';
+  return 'desktop';
+}
+
+const platform = detectPlatform();
+document.querySelectorAll('.cta-group [data-platform]').forEach(el => {
+  if (el.dataset.platform !== platform) el.remove();
+});

@@ -79,6 +79,8 @@ const TRANSLATIONS = {
 
     // Download
     'download.cta': 'Get it on Google Play',
+    'download.ios': 'Use it on iOS',
+    'download.desktop': 'Use it on Desktop',
 
     // FAQs page
     'faq.page.title': 'FAQs',
@@ -311,6 +313,8 @@ const TRANSLATIONS = {
 
     // Download
     'download.cta': 'Unduh di Google Play',
+    'download.ios': 'Gunakan di iOS',
+    'download.desktop': 'Gunakan di Desktop',
 
     // FAQs page
     'faq.page.title': 'FAQ',
